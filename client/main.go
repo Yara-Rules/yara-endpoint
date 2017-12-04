@@ -3,7 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"os"
+	"strconv"
+	"strings"
 )
 
 /*
@@ -44,14 +47,39 @@ func printVerion() {
 
 func init() {
 	flag.StringVar(&Server, "server", Server, "Server IP/DNS")
-	flag.IntVar(&Port, "port", Port, fmt.Sprintf("Server port (default: %d)", Port))
+	flag.IntVar(&Port, "port", Port, "Server port")
 	flag.BoolVar(&ShowVersion, "version", ShowVersion, "Show version")
 }
 
 func main() {
+
 	flag.Parse()
 
 	validateFlags()
+
+	connString := strings.Join([]string{Server, strconv.Itoa(Port)}, ":")
+
+	fmt.Println("ConnString: ", connString)
+
+	nc := NewClient()
+	fmt.Println("Created new Client")
+
+	err := nc.Connect(connString)
+	fmt.Println("Connected")
+
+	if err != nil {
+		log.Fatalf("Error: %s", err)
+	}
+	defer nc.Close()
+
+	msg := NewMessage()
+
+	msg.ClientID = "TEST"
+
+	fmt.Println("New message: ", msg)
+
+	nc.Send(msg)
+
 }
 
 func validateFlags() {
@@ -60,8 +88,10 @@ func validateFlags() {
 	}
 	if Server == "" {
 		fmt.Fprintln(os.Stderr, "You must provide a server address.")
+		os.Exit(1)
 	}
-	if Port < 1 || Port > 65535 {
+	if Port < 0 || Port > 65535 {
 		fmt.Fprintln(os.Stderr, "You must provide a valid port number.")
+		os.Exit(1)
 	}
 }
