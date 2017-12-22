@@ -3,10 +3,13 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
 	"os"
 	"strconv"
-	"strings"
+	"time"
+
+	"github.com/Yara-Rules/yara-endpoint/common"
+	"github.com/k0kubun/pp"
+	log "github.com/sirupsen/logrus"
 )
 
 /*
@@ -38,6 +41,8 @@ var (
 	ShowVersion = false
 )
 
+const NUM_REGISTRY_TRIES = 3
+
 func printVerion() {
 	fmt.Fprintf(os.Stdout, "Yara-Endpoint %s\n", Version)
 	fmt.Fprintf(os.Stdout, "Build ID %s\n", BuildID)
@@ -49,6 +54,10 @@ func init() {
 	flag.StringVar(&Server, "server", Server, "Server IP/DNS")
 	flag.IntVar(&Port, "port", Port, "Server port")
 	flag.BoolVar(&ShowVersion, "version", ShowVersion, "Show version")
+
+	log.SetFormatter(&log.TextFormatter{})
+	log.SetOutput(os.Stdout)
+	log.SetLevel(log.DebugLevel)
 }
 
 func main() {
@@ -57,29 +66,56 @@ func main() {
 
 	validateFlags()
 
-	connString := strings.Join([]string{Server, strconv.Itoa(Port)}, ":")
+	log.Info("*** Starting Yara-Endpint ***")
 
-	fmt.Println("ConnString: ", connString)
+	nc := NewClient(Server, strconv.Itoa(Port))
+	log.Debug("Created new Client")
 
-	nc := NewClient()
-	fmt.Println("Created new Client")
+	if err := nc.CheckRegister(); err != nil {
+		log.Fatal("Incorrect config file format")
+	} else {
+		if nc.ULID == "" {
+			log.Info("Endpoint no registered. Registering...")
 
-	err := nc.Connect(connString)
-	fmt.Println("Connected")
+			msg := new(common.Message)
+			carryOn := false
 
-	if err != nil {
-		log.Fatalf("Error: %s", err)
+			for i := 1; i <= NUM_REGISTRY_TRIES; i++ {
+				log.Infof("Sending register command %d/%d.", i, NUM_REGISTRY_TRIES)
+				msg, err = nc.Register()
+				if err != nil {
+					log.Error(err)
+					log.Infof("Unable to get registered: try %d/%d", i, NUM_REGISTRY_TRIES)
+				} else {
+					carryOn = true
+					break
+				}
+				time.Sleep(1 * time.Second)
+			}
+
+			if carryOn {
+				log.Infof("Endpoint got registered with ID: %s", msg.ULID)
+				log.Debugf("Message (recv): %v\n", msg)
+
+				nc.SaveConfig(msg.ULID)
+			} else {
+				log.Fatal("Reached max tries for the registry process.")
+			}
+		}
+
+		// Endpoint registered and configured properly
+
+		for {
+			log.Info("Sending ping command")
+			if msg, err := nc.SendPing(); err != nil {
+				log.Error(err)
+			} else {
+				log.Info("Get pong")
+				pp.Println(msg)
+			}
+			time.Sleep(5 * time.Second)
+		}
 	}
-	defer nc.Close()
-
-	msg := NewMessage()
-
-	msg.ClientID = "TEST"
-
-	fmt.Println("New message: ", msg)
-
-	nc.Send(msg)
-
 }
 
 func validateFlags() {

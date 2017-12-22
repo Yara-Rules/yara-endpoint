@@ -1,9 +1,10 @@
-package main
+package common
 
 type Command int
 
 const (
-	Register Command = iota
+	Reserved Command = iota
+	Register
 	Ping
 	Scan
 	ScanFile
