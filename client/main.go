@@ -7,19 +7,10 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/Yara-Rules/yara-endpoint/common"
-	"github.com/k0kubun/pp"
+	"github.com/Yara-Rules/yara-endpoint/common/command"
+	"github.com/Yara-Rules/yara-endpoint/common/errors"
 	log "github.com/sirupsen/logrus"
 )
-
-/*
-1- Comprobar que tiene el fichero/clave de registro.
-    1.1- Crear fichero/clave de registro.
-2- Enviar _keep alive_
-    2.1- Comprobar si hay retorno de comando
-    2.2- Ejecutar comando
-3- Volver al punto 2
-*/
 
 var (
 	// Version is the bot version
@@ -37,11 +28,15 @@ var (
 	// Port is the connection port to the server
 	Port = 8080
 
-	// showVersion show up the version
+	// ShowVersion show up the version
 	ShowVersion = false
 )
 
-const NUM_REGISTRY_TRIES = 3
+const (
+	WAIT_BETWEEN_PING  = 5
+	NUM_REGISTRY_TRIES = 3
+	SCAN_TIMEOUT       = 60
+)
 
 func printVerion() {
 	fmt.Fprintf(os.Stdout, "Yara-Endpoint %s\n", Version)
@@ -55,65 +50,54 @@ func init() {
 	flag.IntVar(&Port, "port", Port, "Server port")
 	flag.BoolVar(&ShowVersion, "version", ShowVersion, "Show version")
 
-	log.SetFormatter(&log.TextFormatter{})
+	log.SetFormatter(&log.JSONFormatter{})
 	log.SetOutput(os.Stdout)
-	log.SetLevel(log.DebugLevel)
+	log.SetLevel(log.DebugLevel) // InfoLevel
 }
 
 func main() {
-
 	flag.Parse()
-
 	validateFlags()
 
-	log.Info("*** Starting Yara-Endpint ***")
-
+	log.Infof("*** Starting Yara-Endpint %s ***", Version)
 	nc := NewClient(Server, strconv.Itoa(Port))
-	log.Debug("Created new Client")
+	log.Debug("New client created")
 
-	if err := nc.CheckRegister(); err != nil {
-		log.Fatal("Incorrect config file format")
+	if err := nc.IsRegistered(); err != nil {
+		log.Error("Incorrect config file format")
 	} else {
 		if nc.ULID == "" {
 			log.Info("Endpoint no registered. Registering...")
-
-			msg := new(common.Message)
-			carryOn := false
-
-			for i := 1; i <= NUM_REGISTRY_TRIES; i++ {
-				log.Infof("Sending register command %d/%d.", i, NUM_REGISTRY_TRIES)
-				msg, err = nc.Register()
-				if err != nil {
-					log.Error(err)
-					log.Infof("Unable to get registered: try %d/%d", i, NUM_REGISTRY_TRIES)
-				} else {
-					carryOn = true
-					break
-				}
-				time.Sleep(1 * time.Second)
-			}
-
-			if carryOn {
-				log.Infof("Endpoint got registered with ID: %s", msg.ULID)
-				log.Debugf("Message (recv): %v\n", msg)
-
-				nc.SaveConfig(msg.ULID)
-			} else {
-				log.Fatal("Reached max tries for the registry process.")
-			}
+			nc.RegisterEndpoint()
 		}
 
-		// Endpoint registered and configured properly
-
+		// Endpoint it now registered and configured properly, carry on.
 		for {
-			log.Info("Sending ping command")
-			if msg, err := nc.SendPing(); err != nil {
-				log.Error(err)
+			msg := nc.Ping()
+
+			if msg.Error {
+				log.Errorf("Server says: %s", errors.Errors[msg.ErrorID])
+				switch msg.ErrorID {
+				case errors.NeedsRegister:
+					nc.RegisterEndpoint()
+				case errors.UnableToUpdateDB:
+
+				}
 			} else {
-				log.Info("Get pong")
-				pp.Println(msg)
+				switch msg.CMD {
+				case command.ScanFile:
+					log.Info("Received ScanFile command.")
+					go nc.ScanFile(msg)
+				case command.ScanDir:
+					log.Info("Received ScanDir command.")
+					go nc.ScanDir(msg)
+				case command.ScanPID:
+					log.Info("Received ScanPID command.")
+					go nc.ScanPID(msg)
+				case command.Ping:
+				}
 			}
-			time.Sleep(5 * time.Second)
+			time.Sleep(WAIT_BETWEEN_PING * time.Second)
 		}
 	}
 }
