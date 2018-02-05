@@ -38,9 +38,6 @@ var (
 	ShowVersion = false
 )
 
-// var numMessages = 1
-var i = 0
-
 var (
 	cfile string = "yesconf.ini"
 )
@@ -271,11 +268,4 @@ func extractRules(db *mgo.Database, RuleList []bson.ObjectId) string {
 		rules += rule.Data
 	}
 	return rules
-}
-
-func checkErr(err error) {
-	if err != nil {
-		fmt.Println("Fatal error ", err.Error())
-		os.Exit(1)
-	}
 }
