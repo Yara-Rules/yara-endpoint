@@ -20,5 +20,10 @@ func RegisterRoutes(m *macaron.Macaron) {
 		m.Delete("/delete/:id", api.TasksDelete).Name("deleteTask")
 		m.Get("/results", api.TasksResults).Name("tasksResults")
 		m.Get("/result/:id", api.TasksResult).Name("taskResult")
+		m.Get("/result/:id/report/:id", api.TasksReport).Name("taskReport")
+	})
+	m.Group("/errors", func() {
+		m.Get("/", api.ShowErrors).Name("showErrors")
+		m.Delete("/:id", api.ErrorDelete).Name("deleteError")
 	})
 }

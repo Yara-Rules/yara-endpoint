@@ -52,6 +52,7 @@ func init() {
 
 	log.SetFormatter(&log.JSONFormatter{})
 	log.SetOutput(os.Stdout)
+	// log.SetLevel(log.InfoLevel) // DebugLevel
 	log.SetLevel(log.DebugLevel) // InfoLevel
 }
 
