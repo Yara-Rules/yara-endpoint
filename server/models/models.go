@@ -39,13 +39,13 @@ var States = map[State]string{
 
 // Endpoint collection
 type Endpoint struct {
-	ID       bson.ObjectId `bson:"_id,omitempty"`
-	ULID     string        `bson:"ulid"`
-	Hostname string        `bson:"hostame"`
-	Tags     []string      `bson:"tags"`
-	LastPing time.Time     `bson:"last_ping"`
-	CreateAt time.Time     `bson:"created_at"`
-	UpdateAt time.Time     `bson:"updated_at"`
+	ID       bson.ObjectId `bson:"_id,omitempty" json:"-"`
+	ULID     string        `bson:"ulid"          json:"ulid"`
+	Hostname string        `bson:"hostame"       json:"hostame"`
+	Tags     []string      `bson:"tags"          json:"tags"`
+	LastPing time.Time     `bson:"last_ping"     json:"last_ping"`
+	CreateAt time.Time     `bson:"created_at"    json:"created_at"`
+	UpdateAt time.Time     `bson:"updated_at"    json:"updated_at"`
 }
 
 /* Schematic for schedule collection */

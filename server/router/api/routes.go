@@ -19,7 +19,9 @@ func Dashboard(ctx *context.Context) {
 
 	eps := new([]models.Endpoint)
 	ctx.DB.C(models.Endpoints).Find(nil).All(eps)
-	ctx.JSON(200, eps)
+	// ctx.JSON(200, eps)
+	ctx.Data["assets"] = eps
+	ctx.HTML(200, "index")
 }
 
 func Assets(ctx *context.Context) {
