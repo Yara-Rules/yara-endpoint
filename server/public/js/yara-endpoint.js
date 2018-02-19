@@ -39,7 +39,8 @@ function updateMatches(matches, total){
 function updateEndpointsList(obj) {
     var tpl = ejs.compile(_.unescape($("#dashboard-list-of-assets-tpl").html()));
     var html = tpl({d: obj});
-    $("#list-of-assets").prepend(html);
+    $("#list-of-assets").empty();
+    $("#list-of-assets").html(html);
     if ($("#list-of-assets").length >= 50) {
         $("#list-of-assets").find("tr td:nth-child(-n+50)").remove();
     }
@@ -50,6 +51,7 @@ function getDashboard(){
         if (status === "success") {
             $("#total-assets").text(obj.assets.length);
             $("#total-rules").text(obj.rules.length);
+
             var now = moment().subtract(5, 'minutes');
             var online = obj.assets.filter(function(o, i){
                 return moment(o.last_ping) >  now
@@ -77,7 +79,8 @@ function loadListOfAssets(event) {
 function updateListOfAssets(obj) {
     var tpl = ejs.compile(_.unescape($("#list-of-assets-list-tpl").html()));
     var html = tpl({d: obj});
-    $("#list-of-assets").prepend(html);
+    $("#list-of-assets").empty();
+    $("#list-of-assets").html(html);
 }
 
 function getListOfAssets() {
@@ -104,7 +107,8 @@ function loadRules(event) {
 function updateRules(obj) {
     var tpl = ejs.compile(_.unescape($("#rules-list-tpl").html()));
     var html = tpl({d: obj});
-    $("#list-of-rules").prepend(html);
+    $("#list-of-rules").empty();
+    $("#list-of-rules").html(html);
 }
 
 function getRules() {
@@ -155,7 +159,11 @@ function loadReports(event) {
 }
 
 function updateResults(obj) {
-    console.dir(obj);
+    // console.dir(obj);
+    var tpl = ejs.compile(_.unescape($("#reports-list-tpl").html()));
+    var html = tpl({d: obj});
+    $("#list-of-reports").empty();
+    $("#list-of-reports").html(html);
 }
 
 function getReports() {

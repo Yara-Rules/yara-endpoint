@@ -444,7 +444,9 @@
                           <th>Scheduled</th>
                           <th>Asset Name</th>
                           <th>Command</th>
-                          <th>Status</th>
+                          <th>Params</th>
+                          <th>Rules Set</th>
+                          <th>Matched with</th>
                         </tr>
                       </thead>
                       <tbody id="list-of-reports">
@@ -461,24 +463,26 @@
 
     <script id="reports-list-tpl" type="text/html">
       <% $.each(d, function(idx, item) { %>
-          <tr>
-            <td><%= moment(item.task.when).format('DD-MM-YYYY h:mm:ss') %></td>
-            <td><%= item.hostname %> (<%= item.ulid %>)</td>
-            <td>
-              <% if (item.task.command === 1) { %>
-                Scan File
-              <% } else if (item.task.command === 2) { %>
-                Scan Dir
-              <% } else if (item.task.command === 3) { %>
-                Scan PID
-              <% } %>
-            </td>
-            <% if (item.task.status === 0) { %>
-              <td>Pending</td>
-            <% } else { %>
-              <td>In Progress</td>
-            <% } %>
-          </tr>
+        <% $.each(item.reports, function(idx, report) { %>
+          <% $.each(report.result, function(idx, result) { %>
+            <tr>
+              <td><%= moment(report.task.when).format('DD-MM-YYYY h:mm:ss') %></td>
+              <td><%= item.hostname %></td>
+              <td>
+                <% if (report.task.command === 4) { %>
+                  Scan File
+                <% } else if (report.task.command === 5) { %>
+                  Scan Dir
+                <% } else if (report.task.command === 6) { %>
+                  Scan PID
+                <% } %>
+              </td>
+              <td><%= report.task.params %></td>
+              <td><%= report.task.rules %></td>
+              <td><%= result.rule_name %></td>
+            </tr>
+          <% }) %>
+        <% }) %>
       <% }) %>
     </script>
 
