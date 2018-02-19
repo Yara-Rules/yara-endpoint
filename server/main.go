@@ -21,13 +21,20 @@ var (
 	// BuildDate is the compilation date
 	BuildDate = ""
 
+	// Log stuff
+	// logLevel
+	logLevel = "info"
+	// logOutput
+	logOutput = "-"
+	// logFormat
+	logFormat = "json"
+
+	configFileName = "yara-server.ini"
+
 	// ShowVersion show up the version
 	ShowVersion = false
-)
 
-var (
-	cfile string = "yesconf.ini"
-	DB    *database.DataStore
+	DB *database.DataStore
 )
 
 func printVerion() {
@@ -38,23 +45,21 @@ func printVerion() {
 }
 
 func init() {
-	flag.StringVar(&cfile, "configFile", cfile, "Configuration file")
+	flag.StringVar(&configFileName, "configFile", configFileName, "Configuration file")
+	flag.StringVar(&logLevel, "logLevel", logLevel, "Log level")
+	flag.StringVar(&logOutput, "logOutput", logOutput, "Log output file")
+	flag.StringVar(&logFormat, "logFormat", logFormat, "Log output format")
 	flag.BoolVar(&ShowVersion, "version", ShowVersion, "Show version")
-
-	log.SetFormatter(&log.JSONFormatter{})
-	log.SetOutput(os.Stdout)
-	// log.SetLevel(log.InfoLevel) // DebugLevel
-	log.SetLevel(log.DebugLevel) // InfoLevel
 }
 
 func main() {
 	// Parse command line flags
 	flag.Parse()
-
+	setLog()
 	log.Infof("** Yara-Endpoint Server %s **", Version)
 
 	// Read config
-	config.LoadConfig(cfile)
+	config.LoadConfig(configFileName)
 
 	// Setting up TCP Server
 	log.Info("Starting TCP Server")
@@ -85,5 +90,31 @@ func main() {
 		}
 		log.Debugf("New connection accepted from %s", conn.RemoteAddr())
 		go srv.HandleClient()
+	}
+}
+
+func setLog() {
+	if logFormat == "josn" {
+		log.SetFormatter(&log.JSONFormatter{})
+	} else {
+		log.SetFormatter(&log.TextFormatter{})
+	}
+	if logOutput == "-" {
+		log.SetOutput(os.Stdout)
+	} else {
+		out, err := os.OpenFile(logOutput, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(-1)
+		}
+		log.SetOutput(out)
+	}
+	switch logLevel {
+	case "warn":
+		log.SetLevel(log.WarnLevel)
+	case "debug":
+		log.SetLevel(log.DebugLevel)
+	case "info":
+		log.SetLevel(log.InfoLevel)
 	}
 }

@@ -8,20 +8,28 @@ import (
 	"github.com/Yara-Rules/yara-endpoint/server/models"
 )
 
-type Error struct {
-	Error    bool   `json:"error"`
-	ErrorID  int    `json:"error_id"`
-	ErrorMsg string `json:"error_msg"`
+func Index(ctx *context.Context) {
+	/**/
+	ctx.HTML(200, "index")
 }
 
 func Dashboard(ctx *context.Context) {
 	/**/
 
+	var data dashboard
+
 	eps := new([]models.Endpoint)
+	rls := new([]models.Rule)
+
 	ctx.DB.C(models.Endpoints).Find(nil).All(eps)
-	// ctx.JSON(200, eps)
-	ctx.Data["assets"] = eps
-	ctx.HTML(200, "index")
+	ctx.DB.C(models.Rules).Find(nil).All(rls)
+
+	data = dashboard{
+		Asset: (*eps),
+		Rules: (*rls),
+	}
+
+	ctx.JSON(200, data)
 }
 
 func Assets(ctx *context.Context) {
@@ -53,20 +61,20 @@ func DeleteRules(ctx *context.Context) {
 	if bson.IsObjectIdHex(id) {
 		err := ctx.DB.C(models.Rules).RemoveId(bson.ObjectIdHex(id))
 		if err == mgo.ErrNotFound {
-			ctx.JSON(400, Error{
+			ctx.JSON(400, error_{
 				Error:    true,
 				ErrorID:  1,
 				ErrorMsg: "Rule not found",
 			})
 			return
 		} else {
-			ctx.JSON(200, Error{
+			ctx.JSON(200, error_{
 				Error: false,
 			})
 			return
 		}
 	}
-	ctx.JSON(400, Error{
+	ctx.JSON(400, error_{
 		Error:    true,
 		ErrorID:  1,
 		ErrorMsg: "Not valid ID",
@@ -76,9 +84,54 @@ func DeleteRules(ctx *context.Context) {
 func ShowTasks(ctx *context.Context) {
 	/* TODO: Consultar en la base de datos el listado de tareas pendientes de ejecución o en ejección
 	 */
-	tasks := new([]models.Schedule)
-	ctx.DB.C(models.Schedules).Find(nil).All(tasks)
-	ctx.JSON(200, tasks)
+	var pTask []publicTasks
+	var rulename map[string]string
+	var hostname map[string]string
+
+	rulename = map[string]string{}
+	hostname = map[string]string{}
+
+	var schedules []models.Schedule
+	ctx.DB.C(models.Schedules).Find(nil).All(&schedules)
+
+	pTask = []publicTasks{}
+
+	for _, schedule := range schedules {
+		t := publicTasks{}
+		t.ULID = schedule.ULID
+
+		if val, ok := hostname[schedule.ULID]; ok {
+			t.Hostname = val
+		} else {
+			tmp := new(models.Endpoint)
+			ctx.DB.C(models.Endpoints).Find(bson.M{"ulid": schedule.ULID}).One(tmp)
+			hostname[schedule.ULID] = tmp.Hostname
+			t.Hostname = tmp.Hostname
+		}
+
+		for _, task := range schedule.Tasks {
+			tmp_rules := []string{}
+			for _, ruleID := range task.Rules {
+				if val, ok := rulename[ruleID.Hex()]; ok {
+					tmp_rules = append(tmp_rules, val)
+				} else {
+					tmp := new(models.Rule)
+					ctx.DB.C(models.Rules).Find(bson.M{"_id": ruleID}).One(tmp)
+					rulename[tmp.ID.Hex()] = tmp.Name
+					tmp_rules = append(tmp_rules, tmp.Name)
+				}
+			}
+			t.Task.Command = task.Command
+			t.Task.Rules = tmp_rules
+			t.Task.Status = task.Status
+			t.Task.When = task.When
+			t.Task.UpdateAt = task.UpdateAt
+
+			pTask = append(pTask, t)
+		}
+	}
+
+	ctx.JSON(200, pTask)
 }
 
 func TasksAdd(ctx *context.Context) {
@@ -94,20 +147,20 @@ func TasksDelete(ctx *context.Context) {
 	if bson.IsObjectIdHex(id) {
 		err := ctx.DB.C(models.Schedules).RemoveId(bson.ObjectIdHex(id))
 		if err == mgo.ErrNotFound {
-			ctx.JSON(400, Error{
+			ctx.JSON(400, error_{
 				Error:    true,
 				ErrorID:  1,
 				ErrorMsg: "Rule not found",
 			})
 			return
 		} else {
-			ctx.JSON(200, Error{
+			ctx.JSON(200, error_{
 				Error: false,
 			})
 			return
 		}
 	}
-	ctx.JSON(400, Error{
+	ctx.JSON(400, error_{
 		Error:    true,
 		ErrorID:  1,
 		ErrorMsg: "Not valid ID",
@@ -117,9 +170,9 @@ func TasksDelete(ctx *context.Context) {
 func TasksResults(ctx *context.Context) {
 	/* TODO: Consultar en la base de datos el listado de todos los resultados
 	 */
-	report := new([]models.Report)
-	ctx.DB.C(models.Reports).Find(nil).All(report)
-	ctx.JSON(200, report)
+	reports := new([]models.Report)
+	ctx.DB.C(models.Reports).Find(nil).All(reports)
+	ctx.JSON(200, reports)
 }
 
 func TasksResult(ctx *context.Context) {
@@ -147,20 +200,20 @@ func ErrorDelete(ctx *context.Context) {
 	if bson.IsObjectIdHex(id) {
 		err := ctx.DB.C(models.Errors).Update(bson.ObjectIdHex(id), bson.M{"acknowledge": true})
 		if err == mgo.ErrNotFound {
-			ctx.JSON(400, Error{
+			ctx.JSON(400, error_{
 				Error:    true,
 				ErrorID:  1,
 				ErrorMsg: "Rule not found",
 			})
 			return
 		} else {
-			ctx.JSON(200, Error{
+			ctx.JSON(200, error_{
 				Error: false,
 			})
 			return
 		}
 	}
-	ctx.JSON(400, Error{
+	ctx.JSON(400, error_{
 		Error:    true,
 		ErrorID:  1,
 		ErrorMsg: "Not valid ID",

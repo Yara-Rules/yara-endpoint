@@ -69,5 +69,5 @@ windows-x64:
 	make -C server windows-x64
 
 clean:
-	rm -rf client/$(TARGET_DIR)
-	rm -rf server/$(TARGET_DIR)
+	make -C client clean
+	make -C server clean

@@ -1,6 +1,17 @@
 
 YARA_VERSION := v3.7.1
 
+# Build stuff
+VERSION=v1.0.0
+BUILD_TIME=`date +%FT%T%z`
+BUILD=`git rev-parse HEAD`
+LDFLAGS=-ldflags="\
+	-s \
+	-w \
+	-X main.Name=${BINARY} \
+	-X main.Version=${VERSION} \
+	-X main.BuildID=${BUILD} \
+	-X main.BuildDate=${BUILD_TIME}"
 
 GO := $(shell type go)
 XGO := $(shell type xgo)
@@ -29,34 +40,34 @@ endif
 # endif
 
 all:
-	xgo -image $(DOCKER_IMAGE) -dest build -out yara-endpoint-s -deps $(DEPS) -targets="linux/*,darwin/*,windows/*" .
+	xgo -image $(DOCKER_IMAGE) -ldflags $(LDFLAGS) -dest build -out yara-endpoint-s -deps $(DEPS) -targets="linux/*,darwin/*,windows/*" .
 
 linux:
-	xgo -image $(DOCKER_IMAGE) -dest build -out yara-endpoint-s -deps $(DEPS) -targets="linux/*" .
+	xgo -image $(DOCKER_IMAGE) -ldflags $(LDFLAGS) -dest build -out yara-endpoint-s -deps $(DEPS) -targets="linux/*" .
 
 linux-x86:
-	xgo -image $(DOCKER_IMAGE) -dest build -out yara-endpoint-s -deps $(DEPS) -targets="linux/386" .
+	xgo -image $(DOCKER_IMAGE) -ldflags $(LDFLAGS) -dest build -out yara-endpoint-s -deps $(DEPS) -targets="linux/386" .
 
 linux-x64:
-	xgo -image $(DOCKER_IMAGE) -dest build -out yara-endpoint-s -deps $(DEPS) -targets="linux/amd64" .
+	xgo -image $(DOCKER_IMAGE) -ldflags $(LDFLAGS) -dest build -out yara-endpoint-s -deps $(DEPS) -targets="linux/amd64" .
 
 darwin:
-	xgo -image $(DOCKER_IMAGE) -dest build -out yara-endpoint-s -deps $(DEPS) -targets="darwin/*" .
+	xgo -image $(DOCKER_IMAGE) -ldflags $(LDFLAGS) -dest build -out yara-endpoint-s -deps $(DEPS) -targets="darwin/*" .
 
 darwin-x86:
-	xgo -image $(DOCKER_IMAGE) -dest build -out yara-endpoint-s -deps $(DEPS) -targets="darwin/386" .
+	xgo -image $(DOCKER_IMAGE) -ldflags $(LDFLAGS) -dest build -out yara-endpoint-s -deps $(DEPS) -targets="darwin/386" .
 
 darwin-x64:
-	xgo -image $(DOCKER_IMAGE) -dest build -out yara-endpoint-s -deps $(DEPS) -targets="darwin/amd64" .
+	xgo -image $(DOCKER_IMAGE) -ldflags $(LDFLAGS) -dest build -out yara-endpoint-s -deps $(DEPS) -targets="darwin/amd64" .
 
 windows:
-	xgo -image $(DOCKER_IMAGE) -dest build -out yara-endpoint-s -deps $(DEPS) -targets="windows/*" .
+	xgo -image $(DOCKER_IMAGE) -ldflags $(LDFLAGS) -dest build -out yara-endpoint-s -deps $(DEPS) -targets="windows/*" .
 
 windows-x86:
-	xgo -image $(DOCKER_IMAGE) -dest build -out yara-endpoint-s -deps $(DEPS) -targets="windows/386" .
+	xgo -image $(DOCKER_IMAGE) -ldflags $(LDFLAGS) -dest build -out yara-endpoint-s -deps $(DEPS) -targets="windows/386" .
 
 windows-x64:
-	xgo -image $(DOCKER_IMAGE) -dest build -out yara-endpoint-s -deps $(DEPS) -targets="windows/amd64" .
+	xgo -image $(DOCKER_IMAGE) -ldflags $(LDFLAGS) -dest build -out yara-endpoint-s -deps $(DEPS) -targets="windows/amd64" .
 
 clean:
 	rm -rf $(TARGET_DIR)

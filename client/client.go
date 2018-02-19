@@ -18,8 +18,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const configFileName = "yara-endpoint.ini"
-
 // Config holds the client's configuration
 type Config struct {
 	ULID string `ini:"ulid"`
@@ -149,7 +147,7 @@ func (c *Client) register() (*message.Message, error) {
 	}
 
 	m.CMD = command.Register
-	m.Data = hostname
+	m.Data = fmt.Sprintf("%s|%s", hostname, Version)
 
 	if err := c.sendAndReceive(m); err != nil {
 		return message.NewMessage(), err
@@ -229,6 +227,7 @@ func (c *Client) checkCompilerErr(msg *message.Message, err error) bool {
 		// Error
 		msg.Error = true
 		msg.ErrorMsg = errors.Errors[errors.UnableToGetYaraCompiler]
+		msg.ErrorID = errors.UnableToGetYaraCompiler
 		c.sendAndPrintMsg(msg)
 		// TODO: Check the response, it may contain what to do next
 		return true
@@ -242,6 +241,7 @@ func (c *Client) checkGetRulesErr(msg *message.Message, err error) bool {
 		// Error
 		msg.Error = true
 		msg.ErrorMsg = errors.Errors[errors.UnableToGetRulesFromYaraCompiler]
+		msg.ErrorID = errors.UnableToGetRulesFromYaraCompiler
 		c.sendAndPrintMsg(msg)
 		// TODO: Check the response, it may contain what to do next
 		return true
@@ -255,6 +255,7 @@ func (c *Client) checkFileExistErr(msg *message.Message, err error) bool {
 		// Error
 		msg.Error = true
 		msg.ErrorMsg = errors.Errors[errors.FileDoesNotExist]
+		msg.ErrorID = errors.FileDoesNotExist
 		c.sendAndPrintMsg(msg)
 		// TODO: Check the response, it may contain what to do next
 		return true
@@ -268,6 +269,7 @@ func (c *Client) checkScanErr(msg *message.Message, err error, errorID errors.Er
 		// Error
 		msg.Error = true
 		msg.ErrorMsg = errors.Errors[errorID]
+		msg.ErrorID = errorID
 		c.sendAndPrintMsg(msg)
 		// TODO: Check the response, it may contain what to do next
 		return true
@@ -281,6 +283,7 @@ func (c *Client) checkMsgErr(msg *message.Message, err error) bool {
 		// Error
 		msg.Error = true
 		msg.ErrorMsg = errors.Errors[errors.SendingMsg]
+		msg.ErrorID = errors.SendingMsg
 		c.sendAndPrintMsg(msg)
 		// TODO: Check the response, it may contain what to do next
 		return true
@@ -376,8 +379,6 @@ func (c *Client) ScanDir(msg *message.Message) {
 		return
 	}
 
-	fmt.Println(fileList)
-
 	for _, file := range fileList {
 		fileMatch, err := rules.ScanFile(file, 0, SCAN_TIMEOUT*time.Second)
 		if c.checkScanErr(msg, err, errors.ScanningDir) {
@@ -436,8 +437,8 @@ func (c *Client) ScanPID(msg *message.Message) {
 	}
 
 	matches, err := rules.ScanProc(pid, 0, SCAN_TIMEOUT*time.Second)
+	fmt.Printf("ERR: %v", err)
 	if c.checkScanErr(msg, err, errors.ScanningPID) {
-		log.Debugf("ERR: %s", err)
 		return
 	}
 	log.Debug("ScanPID finished")

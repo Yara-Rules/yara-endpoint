@@ -6,7 +6,7 @@ import (
 )
 
 func RegisterRoutes(m *macaron.Macaron) {
-	m.Get("/", api.Dashboard).Name("index")
+	m.Get("/", api.Index).Name("index")
 	m.Get("/dashboard", api.Dashboard).Name("dashboard")
 	m.Get("/assets", api.Assets).Name("assets")
 	m.Group("/rules", func() {

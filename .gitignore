@@ -18,4 +18,4 @@
 build/
 data/
 *.ini
-!yesconf_dist.ini
+!yara-server_dist.ini

@@ -6,6 +6,7 @@ import (
 	"math/rand"
 	"net"
 	"os"
+	"strings"
 	"time"
 
 	mgo "gopkg.in/mgo.v2"
@@ -17,6 +18,7 @@ import (
 	"github.com/Yara-Rules/yara-endpoint/server/config"
 	"github.com/Yara-Rules/yara-endpoint/server/database"
 	"github.com/Yara-Rules/yara-endpoint/server/models"
+	"github.com/k0kubun/pp"
 	"github.com/oklog/ulid"
 	log "github.com/sirupsen/logrus"
 )
@@ -118,13 +120,15 @@ func (s *Server) processRegister(msg message.Message, db *database.DataStore) {
 	// New endpoint
 	id := newULID()
 	ep := &models.Endpoint{
-		ULID:     id.String(),
-		Hostname: msg.Data,
-		Tags:     []string{},
-		LastPing: time.Now(),
-		CreateAt: time.Now(),
-		UpdateAt: time.Now(),
+		ULID:          id.String(),
+		Hostname:      strings.Split(msg.Data, "|")[0],
+		ClientVersion: strings.Split(msg.Data, "|")[1],
+		Tags:          []string{},
+		LastPing:      time.Now(),
+		CreateAt:      time.Now(),
+		UpdateAt:      time.Now(),
 	}
+	// TODO: Check potential errors
 	db.C(models.Endpoints).Insert(ep)
 	msg.ULID = id.String()
 	s.w.Encode(msg)
@@ -171,6 +175,7 @@ func (s *Server) taskPicker(msg message.Message, jobs models.Schedule, db *datab
 			// err := db.C(models.Schedules).Update(selector, update)
 			if err == mgo.ErrCursor || err == mgo.ErrNotFound {
 				// Track error
+				log.Errorf("[%s] %s", msg.ULID, errors.Errors[errors.UnableToUpdateDB])
 				s.saveErr(msg.ULID, msg.TaskID, errors.UnableToUpdateDB, db)
 				// Send pong as usual. For now
 				msg.Result = "Pong"
@@ -292,7 +297,9 @@ func (s *Server) extractRules(RuleList []bson.ObjectId, db *database.DataStore) 
 
 func (s *Server) checkMsgErr(msg message.Message, state models.State, db *database.DataStore) bool {
 	log.Debugf("[%s] Check error in message", msg.ULID)
+	pp.Println(msg)
 	if msg.Error {
+		log.Errorf("[%s] %s", msg.ULID, errors.Errors[msg.ErrorID])
 		s.saveErr(msg.ULID, msg.TaskID, msg.ErrorID, db)
 		err := s.updateTaskStatus(msg, state, db)
 		if err != nil {
@@ -433,6 +440,7 @@ func (s *Server) updateTaskStatus(msg message.Message, status models.State, db *
 		bson.M{"tasks": bson.M{"$elemMatch": bson.M{"task_id": msg.TaskID}}}}}
 	update := bson.M{"$set": bson.M{"tasks.$.status": status}}
 	if status == models.Failed {
+		log.Errorf("[%s] %s", msg.ULID, errors.Errors[msg.ErrorID])
 		s.saveErr(msg.ULID, msg.TaskID, msg.ErrorID, db)
 	}
 	return db.C(models.Schedules).Update(selector, update)

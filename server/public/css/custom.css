@@ -1,0 +1,5 @@
+.gauge {
+    height: 150px;
+    display: flex;
+    align-items: center;
+}
