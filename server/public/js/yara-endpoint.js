@@ -128,6 +128,12 @@ function getRules() {
         }
     });
 }
+function loadNewRule(event) {
+    $("#board-title").text("New Rule");
+    var tpl = _.unescape($("#new-rule-tpl").html());
+    $("#page-body").empty();
+    $("#page-body").html(tpl);
+}
 
 /*
     Functions for Tasks
