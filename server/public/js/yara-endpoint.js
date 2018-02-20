@@ -78,9 +78,14 @@ function loadListOfAssets(event) {
 
 function updateListOfAssets(obj) {
     var tpl = ejs.compile(_.unescape($("#list-of-assets-list-tpl").html()));
+    var tpl_modal = ejs.compile(_.unescape($("#list-of-assets-modal-tpl").html()));
     var html = tpl({d: obj});
+    var html_modal = tpl_modal({d: obj});
     $("#list-of-assets").empty();
     $("#list-of-assets").html(html);
+    $("#modals").empty();
+    $("#modals").html(html_modal);
+    hljs.initHighlighting();
 }
 
 function getListOfAssets() {
@@ -106,9 +111,14 @@ function loadRules(event) {
 
 function updateRules(obj) {
     var tpl = ejs.compile(_.unescape($("#rules-list-tpl").html()));
+    var tpl_modal = ejs.compile(_.unescape($("#rules-modal-list-tpl").html()));
     var html = tpl({d: obj});
+    var html_modal = tpl_modal({d: obj});
     $("#list-of-rules").empty();
     $("#list-of-rules").html(html);
+    $("#modals").empty();
+    $("#modals").html(html_modal);
+    hljs.initHighlighting();
 }
 
 function getRules() {
@@ -172,4 +182,12 @@ function getReports() {
             updateResults(obj);
         }
     });
+}
+
+/*
+    Auxiliar functions
+*/
+
+function remove_whitespaces(s){
+    return s.replace( /\s/g, "")
 }

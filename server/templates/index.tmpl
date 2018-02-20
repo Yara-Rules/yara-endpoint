@@ -16,6 +16,9 @@
     <!-- MetisMenu CSS -->
     <link href="public/vendor/metisMenu/metisMenu.min.css" rel="stylesheet">
 
+    <!-- Syntax Highlighter -->
+    <link href="public/vendor/highlightjs/default.min.css" rel="stylesheet">
+
     <!-- Custom CSS -->
     <link href="public/vendor/theme/sb-admin-2.css" rel="stylesheet">
 
@@ -122,7 +125,6 @@
             </div>
         </div>
         <!-- /#page-wrapper -->
-
     </div>
     <!-- /#wrapper -->
 
@@ -152,6 +154,9 @@
 
     <!-- Custom Theme JavaScript -->
     <script src="public/vendor/theme/sb-admin-2.js"></script>
+
+    <!-- Syntax Highlighter -->
+    <script src="public/vendor/highlightjs/highlight.min.js"></script>
 
     <!-- Custom JavaScript -->
     <script src="public/js/yara-endpoint.js"></script>
@@ -281,7 +286,7 @@
         <tr>
           <td><%= moment(item.created_at).format('DD-MM-YYYY h:mm:ss') %></td>
           <td><%= item.ulid %></td>
-          <td><%= item.hostame %></td>
+          <td><%= item.hostname %></td>
           <td>
             <% $.each(item.tags, function(idxx, tag) { %>
               <span class="label label-primary"><%= tag %></span>
@@ -291,6 +296,10 @@
             <%= item.version %>
           </td>
           <td>
+            <button type="button" class="btn btn-warning" aria-label="Left Align"
+              data-toggle="modal" data-target="#asset-<%= idx %>-<% item.hostname.replace( /\s/g, '') %>">
+                  <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
+            </button>
             <button type="button" class="btn btn-info" aria-label="Left Align">
                   <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
             </button>
@@ -299,6 +308,54 @@
             </button>
           </td>
         </tr>
+      <% }) %>
+    </script>
+
+    <script id="list-of-assets-modal-tpl" type="text/html">
+      <% $.each(d, function(idx, item){ %>
+      <div class="modal fade" id="asset-<%= idx %>-<% item.hostname.replace( /\s/g, '') %>" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Asset <%= item.hostname %></h4>
+            </div>
+            <div class="modal-body">
+              <div class="row">
+                <div class="col-md-3"><b>Created at:</b></div>
+                <div class="col-md-9"><%= moment(item.created_at).format('DD-MM-YYYY h:mm:ss') %></div>
+              </div>
+              <div class="row">
+                <div class="col-md-3"><b>Updated at:</b></div>
+                <div class="col-md-9"><%= moment(item.updated_at).format('DD-MM-YYYY h:mm:ss') %></div>
+              </div>
+              <div class="row">
+                <div class="col-md-3"><b>ULID:</b></div>
+                <div class="col-md-9"><%= item.ulid %></div>
+              </div>
+              <div class="row">
+                <div class="col-md-3"><b>Hostname:</b></div>
+                <div class="col-md-9"><%= item.hostname %></div>
+              </div>
+              <div class="row">
+                <div class="col-md-3"><b>Tags:</b></div>
+                <div class="col-md-9">
+                  <% $.each(item.tags, function(idxx, tag) { %>
+                    <span class="label label-primary"><%= tag %></span>
+                  <% }) %>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-3"><b>Client version:</b></div>
+                <div class="col-md-9"><%= item.version %></div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
       <% }) %>
     </script>
 
@@ -337,7 +394,8 @@
     <script id="rules-list-tpl" type="text/html">
       <% $.each(d, function(idx, item){ %>
         <tr>
-          <td><%= moment(item.updated_at).format('DD-MM-YYYY h:mm:ss') %></td>
+          <td><%= moment(item.updated_at).format('DD-MM-YYYY h:mm:ss') %>
+          </td>
           <td><%= item.name %></td>
           <td>
             <% $.each(item.tags, function(idxx, tag) { %>
@@ -345,6 +403,10 @@
             <% }) %>
           </td>
           <td>
+            <button type="button" class="btn btn-warning" aria-label="Left Align"
+              data-toggle="modal" data-target="#rule-<%= idx %>-<% item.name.replace( /\s/g, '') %>">
+                  <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
+            </button>
             <button type="button" class="btn btn-info" aria-label="Left Align">
                   <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
             </button>
@@ -353,6 +415,54 @@
             </button>
           </td>
         </tr>
+      <% }) %>
+    </script>
+
+    <script id="rules-modal-list-tpl" type="text/html">
+      <% $.each(d, function(idx, item){ %>
+      <div class="modal fade" id="rule-<%= idx %>-<% item.name.replace( /\s/g, '') %>" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Rule set <%= item.name %></h4>
+            </div>
+            <div class="modal-body">
+              <div class="row">
+                <div class="col-md-3"><b>Created at:</b></div>
+                <div class="col-md-9"><%= moment(item.created_at).format('DD-MM-YYYY h:mm:ss') %></div>
+              </div>
+              <div class="row">
+                <div class="col-md-3"><b>Updated at:</b></div>
+                <div class="col-md-9"><%= moment(item.updated_at).format('DD-MM-YYYY h:mm:ss') %></div>
+              </div>
+              <div class="row">
+                <div class="col-md-3"><b>Rule set:</b></div>
+                <div class="col-md-9"><%= item.name %></div>
+              </div>
+              <div class="row">
+                <div class="col-md-3"><b>Tags:</b></div>
+                <div class="col-md-9">
+                  <% $.each(item.tags, function(idxx, tag) { %>
+                    <span class="label label-primary"><%= tag %></span>
+                  <% }) %>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-3"><b>Rule:</b></div>
+                <div class="col-md-9">
+                  <pre><code class="text">
+                      <%- item.data %>
+                  </code></pre>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
       <% }) %>
     </script>
 
@@ -400,7 +510,7 @@
           <tr class="danger">
         <% } %>
             <td><%= moment(item.task.when).format('DD-MM-YYYY h:mm:ss') %></td>
-            <td><%= item.hostname %> (<%= item.ulid %>)</td>
+            <td><%= item.hostname %></td>
             <td>
               <% if (item.task.command === 4) { %>
                 Scan File
@@ -416,6 +526,10 @@
               <td>In Progress</td>
             <% } %>
             <td>
+              <button type="button" class="btn btn-warning" aria-label="Left Align"
+              data-toggle="modal" data-target="#task-<%= idx %>-<% item.name.replace( /\s/g, '') %>">
+                  <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
+              </button>
               <button type="button" class="btn btn-info" aria-label="Left Align">
                   <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
             </button>
@@ -424,6 +538,54 @@
             </button>
             </td>
           </tr>
+      <% }) %>
+    </script>
+
+    <script id="task-modal-list-tpl" type="text/html">
+      <% $.each(d, function(idx, item){ %>
+      <div class="modal fade" id="task-<%= idx %>-<% item.name.replace( /\s/g, '') %>" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Task <%= item.name %></h4>
+            </div>
+            <div class="modal-body">
+              <div class="row">
+                <div class="col-md-3"><b>Created at:</b></div>
+                <div class="col-md-9"><%= moment(item.created_at).format('DD-MM-YYYY h:mm:ss') %></div>
+              </div>
+              <div class="row">
+                <div class="col-md-3"><b>Updated at:</b></div>
+                <div class="col-md-9"><%= moment(item.updated_at).format('DD-MM-YYYY h:mm:ss') %></div>
+              </div>
+              <div class="row">
+                <div class="col-md-3"><b>Rule set:</b></div>
+                <div class="col-md-9"><%= item.name %></div>
+              </div>
+              <div class="row">
+                <div class="col-md-3"><b>Tags:</b></div>
+                <div class="col-md-9">
+                  <% $.each(item.tags, function(idxx, tag) { %>
+                    <span class="label label-primary"><%= tag %></span>
+                  <% }) %>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-3"><b>Rule:</b></div>
+                <div class="col-md-9">
+                  <pre><code class="text">
+                      <%- item.data %>
+                  </code></pre>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
       <% }) %>
     </script>
 
@@ -495,9 +657,16 @@
         $("#tasks").click(loadTasks);
         $("#reports").click(loadReports);
         renderDashboard();
+        hljs.initHighlightingOnLoad();
+
       }(jQuery));
 
     </script>
+
+    <span id="modals">
+
+    </span>
+
 
 </body>
 

@@ -45,10 +45,10 @@ linux:
 	xgo -image $(DOCKER_IMAGE) -ldflags $(LDFLAGS) -dest build -out yara-endpoint-c -deps $(DEPS) -targets="linux/*" .
 
 linux-x86:
-	xgo -image $(DOCKER_IMAGE) -ldflags $(LDFLAGS) -dest build -out yara-endpoint-c -deps $(DEPS) -targets="linux/386" .
+	xgo -x -image $(DOCKER_IMAGE) -ldflags $(LDFLAGS) -dest build -out yara-endpoint-c -deps $(DEPS) -targets="linux/386" .
 
 linux-x64:
-	xgo -image $(DOCKER_IMAGE) -ldflags $(LDFLAGS) -dest build -out yara-endpoint-c -deps $(DEPS) -targets="linux/amd64" .
+	xgo -x -image $(DOCKER_IMAGE) -ldflags $(LDFLAGS) -dest build -out yara-endpoint-c -deps $(DEPS) -targets="linux/amd64" .
 
 darwin:
 	xgo -image $(DOCKER_IMAGE) -ldflags $(LDFLAGS) -dest build -out yara-endpoint-c -deps $(DEPS) -targets="darwin/*" .

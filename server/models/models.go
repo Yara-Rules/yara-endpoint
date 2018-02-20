@@ -41,7 +41,7 @@ var States = map[State]string{
 type Endpoint struct {
 	ID            bson.ObjectId `bson:"_id,omitempty"  json:"-"`
 	ULID          string        `bson:"ulid"           json:"ulid"`
-	Hostname      string        `bson:"hostame"        json:"hostame"`
+	Hostname      string        `bson:"hostame"        json:"hostname"`
 	ClientVersion string        `bson:"client_version" json:"client_version"`
 	Tags          []string      `bson:"tags"           json:"tags"`
 	LastPing      time.Time     `bson:"last_ping"      json:"last_ping"`
