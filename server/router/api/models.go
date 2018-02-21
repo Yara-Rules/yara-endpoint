@@ -22,10 +22,12 @@ type publicTasks struct {
 	ULID     string `json:"ulid"`
 	Hostname string `json:"hostname"`
 	Task     struct {
+		TaskID   string          `json:"task_id"`
 		Command  command.Command `json:"command"`
 		Rules    []string        `json:"rules"`
 		When     time.Time       `json:"when"`
 		Status   models.State    `json:"status"`
+		CreateAt time.Time       `json:"created_at"`
 		UpdateAt time.Time       `json:"updated_at"`
 	} `json:"task"`
 }

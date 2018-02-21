@@ -121,18 +121,19 @@ function updateRules(obj) {
     hljs.initHighlighting();
 }
 
+function loadNewRule(event) {
+    $("#board-title").text("New Rule");
+    var tpl = _.unescape($("#new-rule-tpl").html());
+    $("#page-body").empty();
+    $("#page-body").html(tpl);
+}
+
 function getRules() {
     $.getJSON("/rules", function(obj, status){
         if (status === "success") {
             updateRules(obj);
         }
     });
-}
-function loadNewRule(event) {
-    $("#board-title").text("New Rule");
-    var tpl = _.unescape($("#new-rule-tpl").html());
-    $("#page-body").empty();
-    $("#page-body").html(tpl);
 }
 
 /*
@@ -149,8 +150,13 @@ function loadTasks(event) {
 
 function updateTasks(obj) {
     var tpl = ejs.compile(_.unescape($("#tasks-list-tpl").html()));
+    var tpl_modal = ejs.compile(_.unescape($("#task-modal-list-tpl").html()));
     var html = tpl({d: obj});
-    $("#list-of-tasks").prepend(html);
+    var html_modal = tpl_modal({d: obj});
+    $("#list-of-tasks").empty();
+    $("#list-of-tasks").html(html);
+    $("#modals").empty();
+    $("#modals").html(html_modal);
 }
 
 function getTasks() {
@@ -177,9 +183,13 @@ function loadReports(event) {
 function updateResults(obj) {
     // console.dir(obj);
     var tpl = ejs.compile(_.unescape($("#reports-list-tpl").html()));
+    var tpl_modal = ejs.compile(_.unescape($("#reports-modal-list-tpl").html()));
     var html = tpl({d: obj});
+    var html_modal = tpl_modal({d: obj});
     $("#list-of-reports").empty();
     $("#list-of-reports").html(html);
+    $("#modals").empty();
+    $("#modals").html(html_modal);
 }
 
 function getReports() {

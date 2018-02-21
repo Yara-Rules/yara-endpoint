@@ -498,6 +498,7 @@
         </div>
       </div>
       <% }) %>
+    </script>
 
     <!-- tasks -->
     <script id="tasks-tpl" type="text/html">
@@ -534,7 +535,6 @@
 
     <script id="tasks-list-tpl" type="text/html">
       <% $.each(d, function(idx, item) { %>
-      <% console.log(item) %>
         <% if (item.task.status === 0) { %>
           <tr>
         <% } else if (item.task.status === 1) { %>
@@ -560,7 +560,7 @@
             <% } %>
             <td>
               <button type="button" class="btn btn-warning" aria-label="Left Align"
-              data-toggle="modal" data-target="#task-<%= idx %>-<% item.name.replace( /\s/g, '') %>">
+              data-toggle="modal" data-target="#task-<%= idx %>-<% item.hostname.replace(/\s/g, '') %>">
                   <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
               </button>
               <button type="button" class="btn btn-info" aria-label="Left Align">
@@ -576,41 +576,71 @@
 
     <script id="task-modal-list-tpl" type="text/html">
       <% $.each(d, function(idx, item){ %>
-      <div class="modal fade" id="task-<%= idx %>-<% item.name.replace( /\s/g, '') %>" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+      <div class="modal fade" id="task-<%= idx %>-<% item.hostname.replace(/\s/g, '') %>" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
         <div class="modal-dialog" role="document">
           <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="myModalLabel">Task <%= item.name %></h4>
+                <h4 class="modal-title" id="myModalLabel">Task for <%= item.hostname %></h4>
             </div>
             <div class="modal-body">
               <div class="row">
+                <div class="col-md-3"><b>Hostname:</b></div>
+                <div class="col-md-9"><%= item.hostname %></div>
+              </div>
+              <div class="row">
+                <div class="col-md-3"><b>ULID:</b></div>
+                <div class="col-md-9"><%= item.ulid %></div>
+              </div>
+              <div class="row">
+                <div class="col-md-3"><b>Task ID:</b></div>
+                <div class="col-md-9"><%= item.task.task_id %></div>
+              </div>
+              <div class="row">
+                <div class="col-md-3"><b>Scheduled for:</b></div>
+                <div class="col-md-9"><%= moment(item.task.when).format('DD-MM-YYYY h:mm:ss') %></div>
+              </div>
+              <div class="row">
+                <div class="col-md-3"><b>Command:</b></div>
+                <div class="col-md-9">
+                  <% if (item.task.command === 4) { %>
+                    Scan File
+                  <% } else if (item.task.command === 5) { %>
+                    Scan Dir
+                  <% } else if (item.task.command === 6) { %>
+                    Scan PID
+                  <% } %>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-3"><b>Status:</b></div>
+                <div class="col-md-9">
+                  <% if (item.task.status === 0) { %>
+                    Pending
+                  <% } else if (item.task.status === 1) { %>
+                    Running
+                  <% } else { %>
+                    Error
+                  <% } %>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-3"><b>Rule sets:</b></div>
+                <div class="col-md-9">
+                  <ul>
+                    <% $.each(item.task.rules, function(idxx, rule_name) { %>
+                      <li><%= rule_name %></li>
+                    <% }) %>
+                  </ul>
+                </div>
+              </div>
+              <div class="row">
                 <div class="col-md-3"><b>Created at:</b></div>
-                <div class="col-md-9"><%= moment(item.created_at).format('DD-MM-YYYY h:mm:ss') %></div>
+                <div class="col-md-9"><%= moment(item.task.created_at).format('DD-MM-YYYY h:mm:ss') %></div>
               </div>
               <div class="row">
                 <div class="col-md-3"><b>Updated at:</b></div>
-                <div class="col-md-9"><%= moment(item.updated_at).format('DD-MM-YYYY h:mm:ss') %></div>
-              </div>
-              <div class="row">
-                <div class="col-md-3"><b>Rule set:</b></div>
-                <div class="col-md-9"><%= item.name %></div>
-              </div>
-              <div class="row">
-                <div class="col-md-3"><b>Tags:</b></div>
-                <div class="col-md-9">
-                  <% $.each(item.tags, function(idxx, tag) { %>
-                    <span class="label label-primary"><%= tag %></span>
-                  <% }) %>
-                </div>
-              </div>
-              <div class="row">
-                <div class="col-md-3"><b>Rule:</b></div>
-                <div class="col-md-9">
-                  <pre><code class="text">
-                      <%- item.data %>
-                  </code></pre>
-                </div>
+                <div class="col-md-9"><%= moment(item.task.updated_at).format('DD-MM-YYYY h:mm:ss') %></div>
               </div>
             </div>
             <div class="modal-footer">
@@ -642,6 +672,7 @@
                           <th>Params</th>
                           <th>Rules Set</th>
                           <th>Matched with</th>
+                          <th>Acctions</th>
                         </tr>
                       </thead>
                       <tbody id="list-of-reports">
@@ -675,9 +706,36 @@
               <td><%= report.task.params %></td>
               <td><%= report.task.rules %></td>
               <td><%= result.rule_name %></td>
+              <td>
+                <button type="button" class="btn btn-warning" aria-label="Left Align"
+              data-toggle="modal" data-target="#report-<%= idx %>-<% item.hostname.replace(/\s/g, '') %>">
+                  <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
+              </button>
+              </td>
             </tr>
           <% }) %>
         <% }) %>
+      <% }) %>
+    </script>
+
+    <script id="reports-modal-list-tpl" type="text/html">
+      <% $.each(d, function(idx, item){ %>
+      <% console.log(item) %>
+      <div class="modal fade" id="report-<%= idx %>-<% item.hostname.replace(/\s/g, '') %>" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Report for <%= item.hostname %></h4>
+            </div>
+            <div class="modal-body">
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
       <% }) %>
     </script>
 
@@ -697,11 +755,7 @@
 
     </script>
 
-    <span id="modals">
-
-    </span>
-
-
+    <span id="modals"></span>
 </body>
 
 </html>

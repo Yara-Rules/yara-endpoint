@@ -121,10 +121,12 @@ func ShowTasks(ctx *context.Context) {
 					tmp_rules = append(tmp_rules, tmp.Name)
 				}
 			}
+			t.Task.TaskID = task.TaskID
 			t.Task.Command = task.Command
 			t.Task.Rules = tmp_rules
 			t.Task.Status = task.Status
 			t.Task.When = task.When
+			t.Task.CreateAt = task.CreateAt
 			t.Task.UpdateAt = task.UpdateAt
 
 			pTask = append(pTask, t)
