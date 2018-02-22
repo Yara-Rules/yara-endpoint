@@ -49,8 +49,16 @@ function updateEndpointsList(obj) {
 function getDashboard(){
     $.getJSON("/dashboard", function(obj, status){
         if (status === "success") {
-            $("#total-assets").text(obj.assets.length);
-            $("#total-rules").text(obj.rules.length);
+            if (_.isNull(obj.assets)) {
+                $("#total-assets").text("0");
+            } else {
+                $("#total-assets").text(obj.assets.length);
+            }
+            if (_.isNull(obj.rules)) {
+                $("#total-rules").text("0");
+            } else {
+                $("#total-rules").text(obj.rules.length);
+            }
 
             var now = moment().subtract(5, 'minutes');
             var online = obj.assets.filter(function(o, i){
@@ -126,6 +134,31 @@ function loadNewRule(event) {
     var tpl = _.unescape($("#new-rule-tpl").html());
     $("#page-body").empty();
     $("#page-body").html(tpl);
+    $("#submit-new-rule").submit(function(event){
+        event.preventDefault();
+        var data = {
+            name: $("#new-rule-name").val(),
+            tags: $("#new-rule-tags").val().split(","),
+            data: $("#new-rule-data").val(),
+        }
+        $.ajax({
+        type: 'POST',
+        url:  '/rules/add',
+        data:  JSON.stringify(data),
+        dataType: 'json',
+        contentType: 'application/json; charset=utf-8'
+      }).done(function(data) {
+        if (! _.isObject(data)) {
+            data = JSON.parse(data);
+        }
+        if (data.error) {
+            alert("The server was unable to insert the rule. Report this.\nErr: " + data.error_msg);
+        } else {
+            alert("Rule inserted correctly.")
+            loadRules();
+        }
+      });
+    });
 }
 
 function getRules() {
@@ -157,6 +190,104 @@ function updateTasks(obj) {
     $("#list-of-tasks").html(html);
     $("#modals").empty();
     $("#modals").html(html_modal);
+}
+
+function loadNewTask() {
+    $("#board-title").text("New Schedule");
+    var tpl = ejs.compile(_.unescape($("#new-task-tpl").html()));
+
+    var assets = getAssetsList();
+    var rules = getRulesList();
+    var commands = getCommandsList();
+
+    var data = {
+        assets: assets,
+        rules: rules,
+        commands: commands,
+    };
+
+    var html = tpl({d: data});
+
+    $("#page-body").empty();
+    $("#page-body").html(html);
+
+    $('.selectpicker').selectpicker('show');
+    $('#datetimepicker').datetimepicker();
+
+    $("#submit-new-task").submit(function(event){
+        event.preventDefault();
+        var data = {
+            assets: $("#new-task-asset").val(),
+            rules: $("#new-task-rule").val(),
+            command: $("#new-task-command").val(),
+            target: $("#new-task-target").val(),
+        }
+        console.dir(data);
+        console.dir(JSON.stringify(data));
+      //   $.ajax({
+      //   type: 'POST',
+      //   url:  '/rules/add',
+      //   data:  JSON.stringify(data),
+      //   dataType: 'json',
+      //   contentType: 'application/json; charset=utf-8'
+      // }).done(function(data) {
+      //   console.log("Response Data" +data); //Log the server response to console
+      // });
+    });
+}
+
+function getData(uri) {
+    var result;
+    $.ajax({
+        async: false,
+        url: uri,
+        dataType: "json",
+        success: function(data){
+            result = data;
+        }
+    });
+    return result;
+}
+function getAssetsList() {
+    return getData("/assets")
+    // var result;
+    // $.ajax({
+    //     async: false,
+    //     url: "/assets",
+    //     dataType: "json",
+    //     success: function(data){
+    //         result = data;
+    //     }
+    // });
+    // return result;
+}
+
+function getRulesList() {
+    return getData("/rules")
+    // var result;
+    // $.ajax({
+    //     async: false,
+    //     url: "/rules",
+    //     dataType: "json",
+    //     success: function(data){
+    //         result = data;
+    //     }
+    // });
+    // return result;
+}
+
+function getCommandsList() {
+    return getData("/commands")
+    // var result;
+    // $.ajax({
+    //     async: false,
+    //     url: "/commands",
+    //     dataType: "json",
+    //     success: function(data){
+    //         result = data;
+    //     }
+    // });
+    // return result;
 }
 
 function getTasks() {

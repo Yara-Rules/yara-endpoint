@@ -5,10 +5,7 @@ YARA_VERSION := v3.7.1
 VERSION=v1.0.0
 BUILD_TIME=`date +%FT%T%z`
 BUILD=`git rev-parse HEAD`
-LDFLAGS=-ldflags="\
-	-s \
-	-w \
-	-X main.Name=${BINARY} \
+LDFLAGS="-s -w \
 	-X main.Version=${VERSION} \
 	-X main.BuildID=${BUILD} \
 	-X main.BuildDate=${BUILD_TIME}"
@@ -45,10 +42,10 @@ linux:
 	xgo -image $(DOCKER_IMAGE) -ldflags $(LDFLAGS) -dest build -out yara-endpoint-c -deps $(DEPS) -targets="linux/*" .
 
 linux-x86:
-	xgo -x -image $(DOCKER_IMAGE) -ldflags $(LDFLAGS) -dest build -out yara-endpoint-c -deps $(DEPS) -targets="linux/386" .
+	xgo -x -image $(DOCKER_IMAGE) -ldflags $(LDFLAGS) -dest build -out yara-endpoint-c -deps $(DEPS) -depsargs="-lm" -targets="linux/386" .
 
 linux-x64:
-	xgo -x -image $(DOCKER_IMAGE) -ldflags $(LDFLAGS) -dest build -out yara-endpoint-c -deps $(DEPS) -targets="linux/amd64" .
+	xgo -x -image $(DOCKER_IMAGE) -ldflags $(LDFLAGS) -dest build -out yara-endpoint-c -deps $(DEPS) -depsargs="-lm" -targets="linux/amd64" .
 
 darwin:
 	xgo -image $(DOCKER_IMAGE) -ldflags $(LDFLAGS) -dest build -out yara-endpoint-c -deps $(DEPS) -targets="darwin/*" .

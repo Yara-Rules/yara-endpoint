@@ -26,7 +26,7 @@ func NewMacaron() *macaron.Macaron {
 		// The global secret value used to generate Tokens. Default is a random string.
 		Secret: randStringBytes(15),
 		// HTTP header used to set and get token. Default is "X-CSRFToken".
-		Header: "X-CSRFToken",
+		Header: "X-CSRF-Token",
 		// Form value used to set and get token. Default is "_csrf".
 		Form: "_csrf",
 		// Cookie value used to set and get token. Default is "_csrf".

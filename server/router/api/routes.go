@@ -1,11 +1,16 @@
 package api
 
 import (
+	"fmt"
+	"math/rand"
+	"time"
+
 	mgo "gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 
 	"github.com/Yara-Rules/yara-endpoint/server/context"
 	"github.com/Yara-Rules/yara-endpoint/server/models"
+	"github.com/oklog/ulid"
 )
 
 func Index(ctx *context.Context) {
@@ -16,7 +21,7 @@ func Index(ctx *context.Context) {
 func Dashboard(ctx *context.Context) {
 	/**/
 
-	var data publicDashboard
+	var data PublicDashboard
 
 	eps := new([]models.Endpoint)
 	rls := new([]models.Rule)
@@ -24,7 +29,7 @@ func Dashboard(ctx *context.Context) {
 	ctx.DB.C(models.Endpoints).Find(nil).All(eps)
 	ctx.DB.C(models.Rules).Find(nil).All(rls)
 
-	data = publicDashboard{
+	data = PublicDashboard{
 		Asset: (*eps),
 		Rules: (*rls),
 	}
@@ -40,6 +45,14 @@ func Assets(ctx *context.Context) {
 	ctx.JSON(200, m)
 }
 
+func Commands(ctx *context.Context) {
+	/* TODO: Consultar en la base de datos el listado de commandos registrados
+	 */
+	ctx.JSON(200, struct {
+		Commands []string `json:"commands"`
+	}{Commands: []string{"ScanFile", "ScanDir", "ScanPID"}})
+}
+
 func ShowRules(ctx *context.Context) {
 	/* TODO: Consultar en la base de datos el listado de reglas
 	 */
@@ -48,9 +61,30 @@ func ShowRules(ctx *context.Context) {
 	ctx.JSON(200, rules)
 }
 
-func AddRules(ctx *context.Context) {
+func AddRules(ctx *context.Context, newRule NewRuleForm) {
 	/* TODO: Añadir una nueva regla
 	 */
+
+	newUlid := newULID()
+	rule := &models.Rule{
+		Name:     newRule.Name,
+		RuleID:   newUlid.String(),
+		Tags:     newRule.Tags,
+		Data:     newRule.Data,
+		CreateAt: time.Now(),
+		UpdateAt: time.Now(),
+	}
+	err := ctx.DB.C(models.Rules).Insert(rule)
+	if err != nil {
+		ctx.JSON(400, Error{
+			Error:    true,
+			ErrorMsg: fmt.Sprintf("%v", err),
+		})
+	} else {
+		ctx.JSON(200, Error{
+			Error: false,
+		})
+	}
 }
 
 func DeleteRules(ctx *context.Context) {
@@ -61,20 +95,20 @@ func DeleteRules(ctx *context.Context) {
 	if bson.IsObjectIdHex(id) {
 		err := ctx.DB.C(models.Rules).RemoveId(bson.ObjectIdHex(id))
 		if err == mgo.ErrNotFound {
-			ctx.JSON(400, error_{
+			ctx.JSON(400, Error{
 				Error:    true,
 				ErrorID:  1,
 				ErrorMsg: "Rule not found",
 			})
 			return
 		} else {
-			ctx.JSON(200, error_{
+			ctx.JSON(200, Error{
 				Error: false,
 			})
 			return
 		}
 	}
-	ctx.JSON(400, error_{
+	ctx.JSON(400, Error{
 		Error:    true,
 		ErrorID:  1,
 		ErrorMsg: "Not valid ID",
@@ -84,7 +118,7 @@ func DeleteRules(ctx *context.Context) {
 func ShowTasks(ctx *context.Context) {
 	/* TODO: Consultar en la base de datos el listado de tareas pendientes de ejecución o en ejección
 	 */
-	var pTask []publicTasks
+	var pTask []PublicTasks
 	var rulename map[string]string
 	var hostname map[string]string
 
@@ -94,10 +128,10 @@ func ShowTasks(ctx *context.Context) {
 	var schedules []models.Schedule
 	ctx.DB.C(models.Schedules).Find(nil).All(&schedules)
 
-	pTask = []publicTasks{}
+	pTask = []PublicTasks{}
 
 	for _, schedule := range schedules {
-		t := publicTasks{}
+		t := PublicTasks{}
 		t.ULID = schedule.ULID
 
 		if val, ok := hostname[schedule.ULID]; ok {
@@ -149,20 +183,20 @@ func TasksDelete(ctx *context.Context) {
 	if bson.IsObjectIdHex(id) {
 		err := ctx.DB.C(models.Schedules).RemoveId(bson.ObjectIdHex(id))
 		if err == mgo.ErrNotFound {
-			ctx.JSON(400, error_{
+			ctx.JSON(400, Error{
 				Error:    true,
 				ErrorID:  1,
 				ErrorMsg: "Rule not found",
 			})
 			return
 		} else {
-			ctx.JSON(200, error_{
+			ctx.JSON(200, Error{
 				Error: false,
 			})
 			return
 		}
 	}
-	ctx.JSON(400, error_{
+	ctx.JSON(400, Error{
 		Error:    true,
 		ErrorID:  1,
 		ErrorMsg: "Not valid ID",
@@ -181,20 +215,20 @@ func TasksResults(ctx *context.Context) {
 	var reports []models.Report
 	ctx.DB.C(models.Reports).Find(nil).All(&reports)
 
-	var pReports []publicReports
-	pReports = make([]publicReports, 0)
+	var pReports []PublicReports
+	pReports = make([]PublicReports, 0)
 
 	for _, report := range reports {
-		one := publicReports{
+		one := PublicReports{
 			ULID:     report.ULID,
 			Hostname: lookupHostname(endpoints, report.ULID),
-			Reports:  make([]reports_, 0),
+			Reports:  make([]Report, 0),
 			CreateAt: report.CreateAt,
 			UpdateAt: report.UpdateAt,
 		}
 
 		for _, rep := range report.Reports {
-			task := task_{
+			task := Task{
 				TaskID:   rep.Task.TaskID,
 				Command:  rep.Task.Command,
 				Rules:    getRuleNames(ctx.DB, rep.Task.Rules),
@@ -205,26 +239,26 @@ func TasksResults(ctx *context.Context) {
 				UpdateAt: rep.Task.UpdateAt,
 			}
 
-			two := reports_{
+			two := Report{
 				ReportID: rep.ReportID,
 				Task:     task,
-				Result:   make([]results_, 0),
+				Result:   make([]Result, 0),
 				CreateAt: rep.CreateAt,
 				UpdateAt: rep.UpdateAt,
 			}
 
 			for _, res := range rep.Result {
-				three := results_{
+				three := Result{
 					File:      res.File,
 					RuleName:  res.RuleName,
 					Namespace: res.Namespace,
 					Tags:      res.Tags,
 					Meta:      res.Meta,
-					Strings:   make([]strings_, 0),
+					Strings:   make([]YString, 0),
 				}
 
 				for _, str := range res.Strings {
-					four := strings_{
+					four := YString{
 						Name:   str.Name,
 						Offset: str.Offset,
 					}
@@ -285,22 +319,28 @@ func ErrorDelete(ctx *context.Context) {
 	if bson.IsObjectIdHex(id) {
 		err := ctx.DB.C(models.Errors).Update(bson.ObjectIdHex(id), bson.M{"acknowledge": true})
 		if err == mgo.ErrNotFound {
-			ctx.JSON(400, error_{
+			ctx.JSON(400, Error{
 				Error:    true,
 				ErrorID:  1,
 				ErrorMsg: "Rule not found",
 			})
 			return
 		} else {
-			ctx.JSON(200, error_{
+			ctx.JSON(200, Error{
 				Error: false,
 			})
 			return
 		}
 	}
-	ctx.JSON(400, error_{
+	ctx.JSON(400, Error{
 		Error:    true,
 		ErrorID:  1,
 		ErrorMsg: "Not valid ID",
 	})
+}
+
+func newULID() ulid.ULID {
+	t := time.Now()
+	entropy := rand.New(rand.NewSource(t.UnixNano()))
+	return ulid.MustNew(ulid.Timestamp(t), entropy)
 }

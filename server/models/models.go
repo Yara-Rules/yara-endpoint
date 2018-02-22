@@ -77,6 +77,7 @@ type Task struct {
 // Rule collection
 type Rule struct {
 	ID       bson.ObjectId `bson:"_id,omitempty"  json:"-"`
+	RuleID   string        `bson:"rule_id"     json:"rule_id"`
 	Name     string        `bson:"name"           json:"name"`
 	Tags     []string      `bson:"tags"           json:"tags"`
 	Data     string        `bson:"data"           json:"data"`
