@@ -18,7 +18,7 @@ func RegisterRoutes(m *macaron.Macaron) {
 	})
 	m.Group("/tasks", func() {
 		m.Get("/", api.ShowTasks).Name("showTasks")
-		m.Post("/add", api.TasksAdd).Name("addTasks")
+		m.Post("/add", binding.Bind(api.NewTaskForm{}), api.TasksAdd).Name("addTasks")
 		m.Delete("/delete/:id", api.TasksDelete).Name("deleteTask")
 		m.Get("/results", api.TasksResults).Name("tasksResults")
 		m.Get("/result/:id", api.TasksResult).Name("taskResult")

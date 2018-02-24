@@ -8,6 +8,7 @@ import (
 	mgo "gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 
+	"github.com/Yara-Rules/yara-endpoint/common/command"
 	"github.com/Yara-Rules/yara-endpoint/server/context"
 	"github.com/Yara-Rules/yara-endpoint/server/models"
 	"github.com/oklog/ulid"
@@ -65,10 +66,9 @@ func AddRules(ctx *context.Context, newRule NewRuleForm) {
 	/* TODO: Añadir una nueva regla
 	 */
 
-	newUlid := newULID()
 	rule := &models.Rule{
 		Name:     newRule.Name,
-		RuleID:   newUlid.String(),
+		RuleID:   newULID().String(),
 		Tags:     newRule.Tags,
 		Data:     newRule.Data,
 		CreateAt: time.Now(),
@@ -122,13 +122,17 @@ func ShowTasks(ctx *context.Context) {
 	var rulename map[string]string
 	var hostname map[string]string
 
+	// Used as buffers
 	rulename = map[string]string{}
 	hostname = map[string]string{}
 
 	var schedules []models.Schedule
 	ctx.DB.C(models.Schedules).Find(nil).All(&schedules)
 
-	pTask = []PublicTasks{}
+	var aa []interface{}
+	ctx.DB.C(models.Schedules).Find(nil).All(&aa)
+
+	pTask = make([]PublicTasks, 0)
 
 	for _, schedule := range schedules {
 		t := PublicTasks{}
@@ -166,13 +170,102 @@ func ShowTasks(ctx *context.Context) {
 			pTask = append(pTask, t)
 		}
 	}
-
 	ctx.JSON(200, pTask)
 }
 
-func TasksAdd(ctx *context.Context) {
+func TasksAdd(ctx *context.Context, newTask NewTaskForm) {
 	/* TODO: Añadir una tarea nueva
 	 */
+	var scs []models.Schedule
+	scs = make([]models.Schedule, 0)
+
+	for _, ep := range newTask.Assets {
+		var tasks []models.Task
+		tasks = make([]models.Task, 0)
+
+		dtime, err := parseDateTime(newTask.When)
+		if err != nil {
+			ctx.JSON(400, Error{
+				Error:    true,
+				ErrorID:  1,
+				ErrorMsg: "Unable to parse the datetime",
+			})
+			return
+		}
+
+		ts := models.Task{
+			TaskID:   newULID().String(),
+			Command:  command.RevAlias[newTask.Command],
+			Rules:    getRulesId(ctx, newTask.Rules),
+			Params:   newTask.Target,
+			When:     dtime,
+			Status:   models.Initial,
+			CreateAt: time.Now(),
+			UpdateAt: time.Now(),
+		}
+
+		tasks = append(tasks, ts)
+
+		sc := models.Schedule{
+			ULID:     ep,
+			Tasks:    tasks,
+			CreateAt: time.Now(),
+			UpdateAt: time.Now(),
+		}
+		scs = append(scs, sc)
+	}
+	err := updateOrInsert(ctx, scs)
+	if err != nil {
+		ctx.JSON(400, Error{
+			Error:    true,
+			ErrorID:  1,
+			ErrorMsg: "Unable to insert the task",
+		})
+		return
+	}
+	ctx.JSON(200, Error{
+		Error: false,
+	})
+	return
+}
+
+func getRulesId(ctx *context.Context, ruleList []string) []bson.ObjectId {
+	var rules []models.Rule
+	ctx.DB.C(models.Rules).Find(bson.M{"rule_id": bson.M{"$in": ruleList}}).All(&rules)
+	var rids []bson.ObjectId
+	rids = make([]bson.ObjectId, 0)
+	for _, r := range rules {
+		rids = append(rids, r.ID)
+	}
+	return rids
+}
+
+func updateOrInsert(ctx *context.Context, scs []models.Schedule) error {
+	coll := ctx.DB.C(models.Schedules)
+	bulk := coll.Bulk()
+	var aux models.Schedule
+
+	fmt.Printf("updateOrInsert (%d)\n", len(scs))
+
+	for _, sc := range scs {
+		err := coll.Find(bson.M{"ulid": sc.ULID}).One(&aux)
+		if err == mgo.ErrNotFound {
+			coll.Insert(sc)
+		} else {
+			selector := bson.M{"ulid": sc.ULID}
+			update := bson.M{"$push": bson.M{"tasks": sc.Tasks}}
+			bulk.Upsert(selector, update)
+			_, err := bulk.Run()
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func parseDateTime(dt string) (time.Time, error) {
+	return time.Parse("02/01/2006 03:04:05 pm", dt)
 }
 
 func TasksDelete(ctx *context.Context) {

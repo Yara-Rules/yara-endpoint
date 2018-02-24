@@ -21,3 +21,13 @@ var Alias = map[Command]string{
 	ScanDir:  "ScanDir",
 	ScanPID:  "ScanPID",
 }
+
+var RevAlias = map[string]Command{
+	"Reserved": Reserved,
+	"Register": Register,
+	"Ping":     Ping,
+	"Scan":     Scan,
+	"ScanFile": ScanFile,
+	"ScanDir":  ScanDir,
+	"ScanPID":  ScanPID,
+}

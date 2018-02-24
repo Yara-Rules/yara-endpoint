@@ -142,16 +142,18 @@ function loadNewRule(event) {
             data: $("#new-rule-data").val(),
         }
         $.ajax({
-        type: 'POST',
-        url:  '/rules/add',
-        data:  JSON.stringify(data),
-        dataType: 'json',
-        contentType: 'application/json; charset=utf-8'
-      }).done(function(data) {
+            type: 'POST',
+            url:  '/rules/add',
+            data:  JSON.stringify(data),
+            dataType: 'json',
+            contentType: 'application/json; charset=utf-8'
+      }).always(function(data) {
         if (! _.isObject(data)) {
             data = JSON.parse(data);
         }
-        if (data.error) {
+        if (_.has(data, "responseJSON") && data.responseJSON.error) {
+            alert("The server was unable to insert the rule. Report this.\nErr: " + data.responseJSON.error_msg);
+        } else if (data.error) {
             alert("The server was unable to insert the rule. Report this.\nErr: " + data.error_msg);
         } else {
             alert("Rule inserted correctly.")
@@ -212,7 +214,9 @@ function loadNewTask() {
     $("#page-body").html(html);
 
     $('.selectpicker').selectpicker('show');
-    $('#datetimepicker').datetimepicker();
+    $('#new-task-datetime').datetimepicker({
+        format: "DD/MM/YYYY hh:mm:ss a",
+    });
 
     $("#submit-new-task").submit(function(event){
         event.preventDefault();
@@ -221,18 +225,29 @@ function loadNewTask() {
             rules: $("#new-task-rule").val(),
             command: $("#new-task-command").val(),
             target: $("#new-task-target").val(),
+            when: $("#new-task-datetime").val(),
         }
-        console.dir(data);
-        console.dir(JSON.stringify(data));
-      //   $.ajax({
-      //   type: 'POST',
-      //   url:  '/rules/add',
-      //   data:  JSON.stringify(data),
-      //   dataType: 'json',
-      //   contentType: 'application/json; charset=utf-8'
-      // }).done(function(data) {
-      //   console.log("Response Data" +data); //Log the server response to console
-      // });
+
+        $.ajax({
+        type: 'POST',
+        url:  '/tasks/add',
+        data:  JSON.stringify(data),
+        dataType: 'json',
+        contentType: 'application/json; charset=utf-8'
+      }).always(function(data){
+        if (! _.isObject(data)) {
+            data = JSON.parse(data);
+        }
+
+        if (_.has(data, "responseJSON") && data.responseJSON.error) {
+            alert("The server was unable to insert the task. Report this.\nErr: " + data.responseJSON.error_msg);
+        } else if (data.error) {
+            alert("The server was unable to insert the task. Report this.\nErr: " + data.error_msg);
+        } else {
+            alert("Task inserted correctly.")
+            loadTasks();
+        }
+      });
     });
 }
 
@@ -250,44 +265,14 @@ function getData(uri) {
 }
 function getAssetsList() {
     return getData("/assets")
-    // var result;
-    // $.ajax({
-    //     async: false,
-    //     url: "/assets",
-    //     dataType: "json",
-    //     success: function(data){
-    //         result = data;
-    //     }
-    // });
-    // return result;
 }
 
 function getRulesList() {
     return getData("/rules")
-    // var result;
-    // $.ajax({
-    //     async: false,
-    //     url: "/rules",
-    //     dataType: "json",
-    //     success: function(data){
-    //         result = data;
-    //     }
-    // });
-    // return result;
 }
 
 function getCommandsList() {
     return getData("/commands")
-    // var result;
-    // $.ajax({
-    //     async: false,
-    //     url: "/commands",
-    //     dataType: "json",
-    //     success: function(data){
-    //         result = data;
-    //     }
-    // });
-    // return result;
 }
 
 function getTasks() {

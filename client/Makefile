@@ -1,8 +1,5 @@
-
-YARA_VERSION := v3.7.1
-
 # Build stuff
-VERSION=v1.0.0
+VERSION=v0.1.0
 BUILD_TIME=`date +%FT%T%z`
 BUILD=`git rev-parse HEAD`
 LDFLAGS="-s -w \
@@ -10,13 +7,15 @@ LDFLAGS="-s -w \
 	-X main.BuildID=${BUILD} \
 	-X main.BuildDate=${BUILD_TIME}"
 
+YARA_VERSION := v3.7.1
+
 GO := $(shell type go)
 XGO := $(shell type xgo)
 DOCKER := $(shell type docker)
 TARGET_DIR := "build"
 
 # "yara-rules/x-go-yara"
-DOCKER_IMAGE := "x-go-yara"
+DOCKER_IMAGE := "x-go-yara-v1"
 # DOCKER_BUILD := $(shell docker images | grep $(DOCKER_IMAGE))
 DEPS := "https://github.com/VirusTotal/yara/archive/$(YARA_VERSION).tar.gz"
 

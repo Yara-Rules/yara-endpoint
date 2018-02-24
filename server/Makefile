@@ -1,8 +1,5 @@
-
-YARA_VERSION := v3.7.1
-
 # Build stuff
-VERSION=v1.0.0
+VERSION=v0.1.0
 BUILD_TIME=`date +%FT%T%z`
 BUILD=`git rev-parse HEAD`
 LDFLAGS=-ldflags="\
@@ -12,6 +9,8 @@ LDFLAGS=-ldflags="\
 	-X main.Version=${VERSION} \
 	-X main.BuildID=${BUILD} \
 	-X main.BuildDate=${BUILD_TIME}"
+
+YARA_VERSION := v3.7.1
 
 GO := $(shell type go)
 XGO := $(shell type xgo)

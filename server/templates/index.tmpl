@@ -24,6 +24,7 @@
 
     <!-- Syntax Highlighter -->
     <link href="public/vendor/highlightjs/default.min.css" rel="stylesheet">
+    <!-- <link href="public/vendor/highlightjs/github-gist.css" rel="stylesheet"> -->
 
     <!-- Custom CSS -->
     <link href="public/vendor/theme/sb-admin-2.css" rel="stylesheet">
@@ -168,7 +169,7 @@
     <script src="public/vendor/bootstrap-select/js/bootstrap-select.min.js"></script>
 
     <!-- Syntax Highlighter -->
-    <script src="public/vendor/highlightjs/highlight.min.js"></script>
+    <script src="public/vendor/highlightjs/highlight.pack.js"></script>
 
     <!-- Custom JavaScript -->
     <script src="public/js/yara-endpoint.js"></script>
@@ -254,7 +255,7 @@
         <tr>
           <td><%= moment(item.created_at).format('DD-MM-YYYY h:mm:ss') %></td>
           <td><%= item.ulid %></td>
-          <td><%= item.hostame %></td>
+          <td><%= item.hostname %></td>
         </tr>
       <% }) %>
     </script>
@@ -337,19 +338,19 @@
                 <div class="col-md-3"><b>Created at:</b></div>
                 <div class="col-md-9"><%= moment(item.created_at).format('DD-MM-YYYY h:mm:ss') %></div>
               </div>
-              <div class="row">
+              <div class="row top10">
                 <div class="col-md-3"><b>Updated at:</b></div>
                 <div class="col-md-9"><%= moment(item.updated_at).format('DD-MM-YYYY h:mm:ss') %></div>
               </div>
-              <div class="row">
+              <div class="row top10">
                 <div class="col-md-3"><b>ULID:</b></div>
                 <div class="col-md-9"><%= item.ulid %></div>
               </div>
-              <div class="row">
+              <div class="row top10">
                 <div class="col-md-3"><b>Hostname:</b></div>
                 <div class="col-md-9"><%= item.hostname %></div>
               </div>
-              <div class="row">
+              <div class="row top10">
                 <div class="col-md-3"><b>Tags:</b></div>
                 <div class="col-md-9">
                   <% $.each(item.tags, function(idxx, tag) { %>
@@ -357,7 +358,7 @@
                   <% }) %>
                 </div>
               </div>
-              <div class="row">
+              <div class="row top10">
                 <div class="col-md-3"><b>Client version:</b></div>
                 <div class="col-md-9"><%= item.version %></div>
               </div>
@@ -488,7 +489,7 @@
               <div class="row top10">
                 <div class="col-md-3"><b>Rule:</b></div>
                 <div class="col-md-9">
-                  <pre class="highlight"><code class="html hljs xml"><%- item.data -%></code></pre>
+                  <pre><code class="yara hljs"><%- item.data -%></code></pre>
               </div>
                 <div class="row top10">
                 <div class="col-md-3"><b>Created at:</b></div>
@@ -543,11 +544,14 @@
     </script>
 
     <script id="tasks-list-tpl" type="text/html">
+      <% console.log(d) %>
       <% $.each(d, function(idx, item) { %>
         <% if (item.task.status === 0) { %>
           <tr>
         <% } else if (item.task.status === 1) { %>
           <tr class="warning">
+        <% } else if (item.task.status === 2) { %>
+          <tr class="success">
         <% } else { %>
           <tr class="danger">
         <% } %>
@@ -564,8 +568,12 @@
             </td>
             <% if (item.task.status === 0) { %>
               <td>Pending</td>
-            <% } else { %>
+            <% } else if (item.task.status === 1) { %>
               <td>In Progress</td>
+            <% } else if (item.task.status === 1) { %>
+              <td>Finished</td>
+            <% } else { %>
+              <td>Error</td>
             <% } %>
             <td>
               <button type="button" class="btn btn-warning" aria-label="Left Align"
@@ -599,7 +607,7 @@
                   <div class="col-md-5">
                     <select id="new-task-asset" class="selectpicker" title="Choose an asset" data-live-search="true" data-actions-box="true" multiple>
                       <% $.each(d.assets, function(idx, item){ %>
-                        <option data-tokens="<%= item.tags.join(' ') %>" value="<%= item.ulid %>"><%= item.hostname %></option>
+                        <option data-tokens="<%= item.tags.join(' ') %> <%= item.hostname %>" value="<%= item.ulid %>"><%= item.hostname %></option>
                       <% }) %>
                     </select>
                   </div>
@@ -609,7 +617,7 @@
                   <div class="col-md-5">
                     <select id="new-task-rule" class="selectpicker" title="Choose a rule" data-live-search="true" data-actions-box="true" multiple>
                       <% $.each(d.rules, function(idx, item){ %>
-                        <option data-tokens="<%= item.tags.join(' ') %>"><%= item.name %></option>
+                        <option data-tokens="<%= item.tags.join(' ') %> <%= item.name %>"  value="<%= item.rule_id %>"><%= item.name %></option>
                       <% }) %>
                     </select>
                   </div>
@@ -622,6 +630,17 @@
                         <option data-tokens="<%= cmd %>"><%= cmd %></option>
                       <% }) %>
                     </select>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="new-task-datetime" class="col-md-2 control-label">Schedule at:</label>
+                  <div class="col-md-5">
+                    <div class="input-group date">
+                    <input id="new-task-datetime" type='text' class="form-control" />
+                    <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                </div>
                   </div>
                 </div>
                 <div class="form-group">
@@ -652,19 +671,19 @@
                 <div class="col-md-3"><b>Hostname:</b></div>
                 <div class="col-md-9"><%= item.hostname %></div>
               </div>
-              <div class="row">
+              <div class="row top10">
                 <div class="col-md-3"><b>ULID:</b></div>
                 <div class="col-md-9"><%= item.ulid %></div>
               </div>
-              <div class="row">
+              <div class="row top10">
                 <div class="col-md-3"><b>Task ID:</b></div>
                 <div class="col-md-9"><%= item.task.task_id %></div>
               </div>
-              <div class="row">
+              <div class="row top10">
                 <div class="col-md-3"><b>Scheduled for:</b></div>
                 <div class="col-md-9"><%= moment(item.task.when).format('DD-MM-YYYY h:mm:ss') %></div>
               </div>
-              <div class="row">
+              <div class="row top10">
                 <div class="col-md-3"><b>Command:</b></div>
                 <div class="col-md-9">
                   <% if (item.task.command === 4) { %>
@@ -676,7 +695,7 @@
                   <% } %>
                 </div>
               </div>
-              <div class="row">
+              <div class="row top10">
                 <div class="col-md-3"><b>Status:</b></div>
                 <div class="col-md-9">
                   <% if (item.task.status === 0) { %>
@@ -688,7 +707,7 @@
                   <% } %>
                 </div>
               </div>
-              <div class="row">
+              <div class="row top10">
                 <div class="col-md-3"><b>Rule sets:</b></div>
                 <div class="col-md-9">
                   <ul>
@@ -698,11 +717,11 @@
                   </ul>
                 </div>
               </div>
-              <div class="row">
+              <div class="row top10">
                 <div class="col-md-3"><b>Created at:</b></div>
                 <div class="col-md-9"><%= moment(item.task.created_at).format('DD-MM-YYYY h:mm:ss') %></div>
               </div>
-              <div class="row">
+              <div class="row top10">
                 <div class="col-md-3"><b>Updated at:</b></div>
                 <div class="col-md-9"><%= moment(item.task.updated_at).format('DD-MM-YYYY h:mm:ss') %></div>
               </div>

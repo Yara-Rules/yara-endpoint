@@ -6,6 +6,7 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"sync"
 	"time"
@@ -174,6 +175,14 @@ func (c *Client) saveConfig(ulid string) error {
 	}
 
 	log.Infof("Saving configuration to %s", configFileName)
+	if runtime.GOOS == "windows" {
+		file, err := os.Create(configFileName)
+		if err != nil {
+			log.Errorf("Unable to create the configuration file. Report your ULID: %s", ulid)
+			os.Exit(-1)
+		}
+		file.Close()
+	}
 	cfg.SaveTo(configFileName)
 
 	return nil

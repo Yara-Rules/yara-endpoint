@@ -85,4 +85,5 @@ type NewTaskForm struct {
 	Rules   []string `json:"rules"   binding:"Required"`
 	Command string   `json:"command" binding:"Required"`
 	Target  string   `json:"target"  binding:"Required"`
+	When    string   `json:"when"    binding:"Required"`
 }
