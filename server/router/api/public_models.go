@@ -44,7 +44,7 @@ type PublicReports struct {
 type Report struct {
 	ReportID string    `json:"report_id"`
 	Task     Task      `json:"task"`
-	Result   []Result  `json:"result"`
+	Result   []Result  `json:"results"`
 	CreateAt time.Time `json:"created_at"`
 	UpdateAt time.Time `json:"updated_at"`
 }

@@ -154,11 +154,9 @@ func (s *Server) processPing(msg message.Message, db *database.DataStore) {
 
 func (s *Server) taskPicker(msg message.Message, jobs models.Schedule, db *database.DataStore) {
 	log.Debugf("[%s] Picking up a task ", msg.ULID)
-
-	now := time.Now().Unix()
 	for _, job := range jobs.Tasks {
 		// Choose the first unprocessed task which is scheduled to be executed before now
-		if job.Status == models.Initial && now >= job.When.Unix() {
+		if job.Status == models.Initial && job.When.After(time.Now()) {
 			msg.TaskID = job.TaskID
 			msg.CMD = job.Command
 			msg.Params = job.Params

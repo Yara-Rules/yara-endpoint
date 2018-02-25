@@ -749,12 +749,9 @@
                     <table class="table">
                       <thead>
                         <tr>
-                          <th>Scheduled</th>
-                          <th>Asset Name</th>
-                          <th>Command</th>
-                          <th>Params</th>
-                          <th>Rules Set</th>
-                          <th>Matched with</th>
+                          <th>Asset name</th>
+                          <th>Numner of reports</th>
+                          <th>Last resport</th>
                           <th>Acctions</th>
                         </tr>
                       </thead>
@@ -772,53 +769,108 @@
 
     <script id="reports-list-tpl" type="text/html">
       <% $.each(d, function(idx, item) { %>
-        <% $.each(item.reports, function(idx, report) { %>
-          <% $.each(report.result, function(idx, result) { %>
-            <tr>
-              <td><%= moment(report.task.when).format('DD-MM-YYYY h:mm:ss') %></td>
-              <td><%= item.hostname %></td>
-              <td>
-                <% if (report.task.command === 4) { %>
-                  Scan File
-                <% } else if (report.task.command === 5) { %>
-                  Scan Dir
-                <% } else if (report.task.command === 6) { %>
-                  Scan PID
-                <% } %>
-              </td>
-              <td><%= report.task.params %></td>
-              <td><%= report.task.rules %></td>
-              <td><%= result.rule_name %></td>
-              <td>
-                <button type="button" class="btn btn-warning" aria-label="Left Align"
-              data-toggle="modal" data-target="#report-<%= idx %>-<% item.hostname.replace(/\s/g, '') %>">
-                  <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
-              </button>
-              </td>
-            </tr>
-          <% }) %>
-        <% }) %>
+        <tr>
+          <td><%= item.hostname %></td>
+          <td><%= item.reports.length %></td>
+          <td><%= moment(item.updated_at).format('DD-MM-YYYY h:mm:ss') %></td>
+          <td>
+            <button type="button" class="btn btn-warning" aria-label="Left Align"
+          data-toggle="modal" data-target="#report-<%= idx %>-<% item.hostname.replace(/\s/g, '') %>">
+              <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
+          </button>
+          </td>
+        </tr>
       <% }) %>
     </script>
 
     <script id="reports-modal-list-tpl" type="text/html">
       <% $.each(d, function(idx, item){ %>
-      <% console.log(item) %>
-      <div class="modal fade" id="report-<%= idx %>-<% item.hostname.replace(/\s/g, '') %>" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
+        <div class="modal fade" id="report-<%= idx %>-<% item.hostname.replace(/\s/g, '') %>" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+          <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 <h4 class="modal-title" id="myModalLabel">Report for <%= item.hostname %></h4>
-            </div>
-            <div class="modal-body">
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              </div>
+              <div class="modal-body">
+                <% $.each(item.reports, function(idxx, report) { %>
+                  <% if (idxx !== 0) { %>
+                    <hr>
+                  <% } %>
+                  <div class="row top10">
+                    <div class="col-md-12 text-center">
+                      <h3>Report Info</h3>
+                    </div>
+                  </div>
+                  <div class="row top10">
+                    <div class="col-md-3"><b>Report ID:</b></div>
+                    <div class="col-md-9"><%= report.report_id %></div>
+                  </div>
+                  <div class="row top10">
+                    <div class="col-md-3"><b>Created at:</b></div>
+                    <div class="col-md-9"><%= moment(report.created_at).format('DD-MM-YYYY h:mm:ss') %></div>
+                  </div>
+                  <hr />
+                  <div class="row top10">
+                    <div class="col-md-12 text-center">
+                      <h4>Task Info</h4>
+                    </div>
+                  </div>
+                  <div class="row top10">
+                    <div class="col-md-3"><b>Command:</b></div>
+                    <div class="col-md-9">
+                      <% if (report.task.command === 4) { %>
+                      Scan File
+                      <% } else if (report.task.command === 5) { %>
+                      Scan Dir
+                      <% } else if (report.task.command === 6) { %>
+                      Scan PID
+                      <% } %>
+                    </div>
+                  </div>
+                  <div class="row top10">
+                    <div class="col-md-3"><b>Target:</b></div>
+                    <div class="col-md-9"><%= report.task.params %></div>
+                  </div>
+                  <div class="row top10">
+                    <div class="col-md-3"><b>Rule set:</b></div>
+                    <div class="col-md-9">
+                      <ul>
+                        <% $.each(report.task.rules, function(x, rule_name) { %>
+                          <li><%= rule_name %></li>
+                        <% }) %>
+                      </ul>
+                    </div>
+                  </div>
+                  <hr />
+                  <div class="row top10">
+                    <div class="col-md-12 text-center">
+                      <h4>Results</h4>
+                    </div>
+                  </div>
+                  <% var results = _.groupBy(report.results, function(res){return res.file}) %>
+                  <% $.each(results, function(file, result){ %>
+                    <div class="row top10">
+                      <div class="col-md-3"><b>File or PID:</b></div>
+                      <div class="col-md-9"><%= file %></div>
+                    </div>
+                    <div class="row top10">
+                      <div class="col-md-3"><b>Rules Matching:</b></div>
+                      <div class="col-md-9">
+                        <% $.each(result, function(idxxx, ress){ %>
+                          <span class="label label-danger"><%= ress.rule_name %></span>
+                        <% }) %>
+                      </div>
+                    </div>
+                  <% }) %>
+                <% }) %>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
       <% }) %>
     </script>
 

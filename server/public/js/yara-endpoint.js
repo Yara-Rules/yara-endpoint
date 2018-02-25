@@ -251,30 +251,6 @@ function loadNewTask() {
     });
 }
 
-function getData(uri) {
-    var result;
-    $.ajax({
-        async: false,
-        url: uri,
-        dataType: "json",
-        success: function(data){
-            result = data;
-        }
-    });
-    return result;
-}
-function getAssetsList() {
-    return getData("/assets")
-}
-
-function getRulesList() {
-    return getData("/rules")
-}
-
-function getCommandsList() {
-    return getData("/commands")
-}
-
 function getTasks() {
     $.getJSON("/tasks", function(obj, status){
         if (status === "success") {
@@ -282,7 +258,6 @@ function getTasks() {
         }
     });
 }
-
 
 /*
     Functions for Reports
@@ -322,4 +297,29 @@ function getReports() {
 
 function remove_whitespaces(s){
     return s.replace( /\s/g, "")
+}
+
+function getAssetsList() {
+    return getData("/assets")
+}
+
+function getRulesList() {
+    return getData("/rules")
+}
+
+function getCommandsList() {
+    return getData("/commands")
+}
+
+function getData(uri) {
+    var result;
+    $.ajax({
+        async: false,
+        url: uri,
+        dataType: "json",
+        success: function(data){
+            result = data;
+        }
+    });
+    return result;
 }
