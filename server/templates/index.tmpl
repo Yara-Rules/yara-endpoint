@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -316,7 +315,7 @@
             <button type="button" class="btn btn-info" aria-label="Left Align">
                   <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
             </button>
-            <button type="button" class="btn btn-danger" aria-label="Left Align">
+            <button type="button" class="btn btn-danger" aria-label="Left Align" onclick="removeAsset('<%= item.ulid %>')">
                   <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
             </button>
           </td>
@@ -422,7 +421,7 @@
             <button type="button" class="btn btn-info" aria-label="Left Align">
                   <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
             </button>
-            <button type="button" class="btn btn-danger" aria-label="Left Align">
+            <button type="button" class="btn btn-danger" aria-label="Left Align" onclick="removeRule('<%= item.rule_id %>')">
                   <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
             </button>
           </td>
@@ -470,8 +469,8 @@
         <div class="modal-dialog" role="document">
           <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="myModalLabel">Rule set <%= item.name %></h4>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title" id="myModalLabel">Rule set <%= item.name %></h4>
             </div>
             <div class="modal-body">
               <div class="row">
@@ -490,15 +489,15 @@
                 <div class="col-md-3"><b>Rule:</b></div>
                 <div class="col-md-9">
                   <pre><code class="yara hljs"><%- item.data -%></code></pre>
+                </div>
               </div>
-                <div class="row top10">
+              <div class="row top10">
                 <div class="col-md-3"><b>Created at:</b></div>
                 <div class="col-md-9"><%= moment(item.created_at).format('DD-MM-YYYY h:mm:ss') %></div>
               </div>
               <div class="row top10">
                 <div class="col-md-3"><b>Updated at:</b></div>
                 <div class="col-md-9"><%= moment(item.updated_at).format('DD-MM-YYYY h:mm:ss') %></div>
-              </div>
               </div>
             </div>
             <div class="modal-footer">
@@ -611,6 +610,11 @@
                       <% }) %>
                     </select>
                   </div>
+                  <% if (_.isNull(d.assets)) { %>
+                  <div class="col-md-5">
+                    <span class="text-danger">There ara no assets, register one first.</span>
+                  </div>
+                  <% } %>
                 </div>
                 <div class="form-group">
                   <label for="new-task-rule" class="col-md-2 control-label">Rule sets:</label>
@@ -621,6 +625,11 @@
                       <% }) %>
                     </select>
                   </div>
+                  <% if (_.isNull(d.rules)) { %>
+                  <div class="col-md-5">
+                    <span class="text-danger">There ara no rules, create one first.</span>
+                  </div>
+                  <% } %>
                 </div>
                 <div class="form-group">
                   <label for="new-task-command" class="col-md-2 control-label">Command:</label>
@@ -636,7 +645,7 @@
                   <label for="new-task-datetime" class="col-md-2 control-label">Schedule at:</label>
                   <div class="col-md-5">
                     <div class="input-group date">
-                    <input id="new-task-datetime" type='text' class="form-control" />
+                    <input id="new-task-datetime" type="text" class="form-control" placeholder="Choose a datetime">
                     <span class="input-group-addon">
                         <span class="glyphicon glyphicon-calendar"></span>
                     </span>
@@ -646,7 +655,7 @@
                 <div class="form-group">
                   <label for="new-task-target" class="col-md-2 control-label">Target:</label>
                   <div class="col-md-10">
-                    <input id="new-task-target" name="target" type='text' class="form-control">
+                    <input id="new-task-target" name="target" type='text' class="form-control" placeholder="File, Folder or PID">
                   </div>
                 </div>
                 <button type="submit" class="btn btn-default">Submit</button>
@@ -848,21 +857,29 @@
                       <h4>Results</h4>
                     </div>
                   </div>
-                  <% var results = _.groupBy(report.results, function(res){return res.file}) %>
-                  <% $.each(results, function(file, result){ %>
+                  <% if (report.results.length === 0) { %>
                     <div class="row top10">
-                      <div class="col-md-3"><b>File or PID:</b></div>
-                      <div class="col-md-9"><%= file %></div>
-                    </div>
-                    <div class="row top10">
-                      <div class="col-md-3"><b>Rules Matching:</b></div>
-                      <div class="col-md-9">
-                        <% $.each(result, function(idxxx, ress){ %>
-                          <span class="label label-danger"><%= ress.rule_name %></span>
-                        <% }) %>
+                      <div class="col-md-12 text-center">
+                        No matches
                       </div>
                     </div>
-                  <% }) %>
+                  <% } else { %>
+                    <% var results = _.groupBy(report.results, function(res){return res.file}) %>
+                    <% $.each(results, function(file, result){ %>
+                      <div class="row top10">
+                        <div class="col-md-3"><b>File or PID:</b></div>
+                        <div class="col-md-9"><%= file %></div>
+                      </div>
+                      <div class="row top10">
+                        <div class="col-md-3"><b>Rules Matching:</b></div>
+                        <div class="col-md-9">
+                          <% $.each(result, function(idxxx, ress){ %>
+                            <span class="label label-danger"><%= ress.rule_name %></span>
+                          <% }) %>
+                        </div>
+                      </div>
+                    <% }) %>
+                  <% } %>
                 <% }) %>
               </div>
               <div class="modal-footer">

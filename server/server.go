@@ -156,7 +156,7 @@ func (s *Server) taskPicker(msg message.Message, jobs models.Schedule, db *datab
 	log.Debugf("[%s] Picking up a task ", msg.ULID)
 	for _, job := range jobs.Tasks {
 		// Choose the first unprocessed task which is scheduled to be executed before now
-		if job.Status == models.Initial && job.When.After(time.Now()) {
+		if job.Status == models.Initial && time.Now().After(job.When) {
 			msg.TaskID = job.TaskID
 			msg.CMD = job.Command
 			msg.Params = job.Params
@@ -184,6 +184,7 @@ func (s *Server) taskPicker(msg message.Message, jobs models.Schedule, db *datab
 			}
 			// Send task to endpoint
 			log.Infof("[%s] Selected task %s", msg.ULID, msg.TaskID)
+			pp.Println(msg)
 			s.w.Encode(msg)
 			return
 		}

@@ -9,12 +9,15 @@ import (
 func RegisterRoutes(m *macaron.Macaron) {
 	m.Get("/", api.Index).Name("index")
 	m.Get("/dashboard", api.Dashboard).Name("dashboard")
-	m.Get("/assets", api.Assets).Name("assets")
+	m.Group("/assets", func() {
+		m.Get("/", api.Assets).Name("assets")
+		m.Delete("/delete/:id", api.DeleteAsset).Name("deleteAsset")
+	})
 	m.Get("/commands", api.Commands).Name("commands")
 	m.Group("/rules", func() {
 		m.Get("/", api.ShowRules).Name("showRules")
 		m.Post("/add", binding.Bind(api.NewRuleForm{}), api.AddRules).Name("addRules")
-		m.Delete("/delete/:id", api.DeleteRules).Name("deleteRules")
+		m.Delete("/delete/:id", api.DeleteRule).Name("deleteRule")
 	})
 	m.Group("/tasks", func() {
 		m.Get("/", api.ShowTasks).Name("showTasks")

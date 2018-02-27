@@ -46,6 +46,31 @@ func Assets(ctx *context.Context) {
 	ctx.JSON(200, m)
 }
 
+func DeleteAsset(ctx *context.Context) {
+	id := ctx.Params(":id")
+	asset := models.Endpoint{}
+
+	err := ctx.DB.C(models.Endpoints).Find(bson.M{"ulid": id}).One(&asset)
+	if err == mgo.ErrNotFound {
+		ctx.JSON(400, Error{
+			Error:    true,
+			ErrorID:  1,
+			ErrorMsg: fmt.Sprintf("%v", err),
+		})
+		return
+	}
+
+	ctx.DB.C(models.Schedules).Remove(bson.M{"ulid": id})
+	ctx.DB.C(models.Reports).Remove(bson.M{"ulid": id})
+	ctx.DB.C(models.Endpoints).Remove(bson.M{"ulid": id})
+
+	ctx.JSON(200, Error{
+		Error:    false,
+		ErrorID:  0,
+		ErrorMsg: "Succesfully removed",
+	})
+}
+
 func Commands(ctx *context.Context) {
 	/* TODO: Consultar en la base de datos el listado de commandos registrados
 	 */
@@ -87,32 +112,59 @@ func AddRules(ctx *context.Context, newRule NewRuleForm) {
 	}
 }
 
-func DeleteRules(ctx *context.Context) {
+func DeleteRule(ctx *context.Context) {
 	/* TODO: Eliminar una nueva regla
 	 */
 
-	id := ctx.Params(":id")
-	if bson.IsObjectIdHex(id) {
-		err := ctx.DB.C(models.Rules).RemoveId(bson.ObjectIdHex(id))
+	ulid := ctx.Params(":id")
+	rule := models.Rule{}
+	err := ctx.DB.C(models.Rules).Find(bson.M{"rule_id": ulid}).One(&rule)
+	if err == mgo.ErrNotFound {
+		ctx.JSON(400, Error{
+			Error:    true,
+			ErrorID:  1,
+			ErrorMsg: fmt.Sprintf("%v", err),
+		})
+		return
+	} else {
+		// db.schedules.update({"tasks.status": 0}, {"$pull": {"tasks.$.rules": {"$in": [ObjectId("5a920b4ede38e3bb2c4ccd63")]}}})
+		selector := bson.M{"tasks.status": 0}
+		update := bson.M{"$pull": bson.M{"tasks.$.rules": bson.M{"$in": [...]bson.ObjectId{rule.ID}}}}
+		err = ctx.DB.C(models.Schedules).Update(selector, update)
 		if err == mgo.ErrNotFound {
 			ctx.JSON(400, Error{
 				Error:    true,
 				ErrorID:  1,
-				ErrorMsg: "Rule not found",
-			})
-			return
-		} else {
-			ctx.JSON(200, Error{
-				Error: false,
+				ErrorMsg: fmt.Sprintf("%v", err),
 			})
 			return
 		}
+		// Cleaning up empy tasks
+		selector = bson.M{"tasks.rules": bson.M{"$size": 0}}
+		err = ctx.DB.C(models.Schedules).Remove(selector)
+		if err == mgo.ErrNotFound {
+			ctx.JSON(400, Error{
+				Error:    true,
+				ErrorID:  1,
+				ErrorMsg: fmt.Sprintf("%v", err),
+			})
+			return
+		}
+		err := ctx.DB.C(models.Rules).Remove(bson.M{"rule_id": ulid})
+		if err == mgo.ErrNotFound {
+			ctx.JSON(400, Error{
+				Error:    true,
+				ErrorID:  1,
+				ErrorMsg: fmt.Sprintf("%v", err),
+			})
+			return
+		}
+		ctx.JSON(200, Error{
+			Error:    false,
+			ErrorID:  0,
+			ErrorMsg: "Rule has been removed",
+		})
 	}
-	ctx.JSON(400, Error{
-		Error:    true,
-		ErrorID:  1,
-		ErrorMsg: "Not valid ID",
-	})
 }
 
 func ShowTasks(ctx *context.Context) {

@@ -96,6 +96,29 @@ function updateListOfAssets(obj) {
     hljs.initHighlighting();
 }
 
+function removeAsset(ulid) {
+    var msg = "This will remove all data about the asset " + ulid + ".\nAre you agree?";
+    if (confirm(msg)) {
+        $.ajax({
+            url: '/assets/delete/' + ulid,
+            type: 'DELETE',
+            dataType: 'json',
+            contentType: 'application/json; charset=utf-8'
+        }).always(function(data) {
+            if (! _.isObject(data)) {
+                data = JSON.parse(data);
+            }
+            if (_.has(data, "responseJSON") && data.responseJSON.error) {
+                alert("The server was unable to delete the asset. Report this.\nErr: " + data.responseJSON.error_msg);
+            } else if (data.error) {
+                alert("The server was unable to delete the asset. Report this.\nErr: " + data.error_msg);
+            } else {
+                loadListOfAssets();
+            }
+        })
+    }
+}
+
 function getListOfAssets() {
     $.getJSON("/assets", function(obj, status){
         if (status === "success") {
@@ -163,6 +186,29 @@ function loadNewRule(event) {
     });
 }
 
+function removeRule(ulid) {
+    var msg = "This will remove all data about the rule " + ulid + ". Including pending analysis.\nAre you agree?";
+    if (confirm(msg)) {
+        $.ajax({
+            url: '/rules/delete/' + ulid,
+            type: 'DELETE',
+            dataType: 'json',
+            contentType: 'application/json; charset=utf-8'
+        }).always(function(data) {
+            if (! _.isObject(data)) {
+                data = JSON.parse(data);
+            }
+            if (_.has(data, "responseJSON") && data.responseJSON.error) {
+                alert("The server was unable to delete the rule. Report this.\nErr: " + data.responseJSON.error_msg);
+            } else if (data.error) {
+                alert("The server was unable to delete the rule. Report this.\nErr: " + data.error_msg);
+            } else {
+                loadRules();
+            }
+        })
+    }
+}
+
 function getRules() {
     $.getJSON("/rules", function(obj, status){
         if (status === "success") {
@@ -216,6 +262,10 @@ function loadNewTask() {
     $('.selectpicker').selectpicker('show');
     $('#new-task-datetime').datetimepicker({
         format: "DD/MM/YYYY hh:mm:ss a",
+        minDate: moment(),
+        toolbarPlacement: "top",
+        showTodayButton: true,
+        showClear: true,
     });
 
     $("#submit-new-task").submit(function(event){
