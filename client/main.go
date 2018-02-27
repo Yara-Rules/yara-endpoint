@@ -129,7 +129,8 @@ func validateFlags() {
 }
 
 func setLog() {
-	if logFormat == "josn" {
+	fmt.Println(logFormat)
+	if logFormat == "json" {
 		log.SetFormatter(&log.JSONFormatter{})
 	} else {
 		log.SetFormatter(&log.TextFormatter{})
