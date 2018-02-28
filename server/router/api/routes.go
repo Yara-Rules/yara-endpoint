@@ -12,6 +12,7 @@ import (
 	"github.com/Yara-Rules/yara-endpoint/server/context"
 	"github.com/Yara-Rules/yara-endpoint/server/models"
 	"github.com/oklog/ulid"
+	log "github.com/sirupsen/logrus"
 )
 
 func Index(ctx *context.Context) {
@@ -130,26 +131,12 @@ func DeleteRule(ctx *context.Context) {
 		// db.schedules.update({"tasks.status": 0}, {"$pull": {"tasks.$.rules": {"$in": [ObjectId("5a920b4ede38e3bb2c4ccd63")]}}})
 		selector := bson.M{"tasks.status": 0}
 		update := bson.M{"$pull": bson.M{"tasks.$.rules": bson.M{"$in": [...]bson.ObjectId{rule.ID}}}}
-		err = ctx.DB.C(models.Schedules).Update(selector, update)
-		if err == mgo.ErrNotFound {
-			ctx.JSON(400, Error{
-				Error:    true,
-				ErrorID:  1,
-				ErrorMsg: fmt.Sprintf("%v", err),
-			})
-			return
-		}
+		ctx.DB.C(models.Schedules).Update(selector, update)
+
 		// Cleaning up empy tasks
 		selector = bson.M{"tasks.rules": bson.M{"$size": 0}}
-		err = ctx.DB.C(models.Schedules).Remove(selector)
-		if err == mgo.ErrNotFound {
-			ctx.JSON(400, Error{
-				Error:    true,
-				ErrorID:  1,
-				ErrorMsg: fmt.Sprintf("%v", err),
-			})
-			return
-		}
+		ctx.DB.C(models.Schedules).Remove(selector)
+
 		err := ctx.DB.C(models.Rules).Remove(bson.M{"rule_id": ulid})
 		if err == mgo.ErrNotFound {
 			ctx.JSON(400, Error{
@@ -228,6 +215,8 @@ func ShowTasks(ctx *context.Context) {
 func TasksAdd(ctx *context.Context, newTask NewTaskForm) {
 	/* TODO: Añadir una tarea nueva
 	 */
+
+	log.Debug("Adding Task")
 	var scs []models.Schedule
 	scs = make([]models.Schedule, 0)
 
@@ -297,27 +286,27 @@ func updateOrInsert(ctx *context.Context, scs []models.Schedule) error {
 	bulk := coll.Bulk()
 	var aux models.Schedule
 
-	fmt.Printf("updateOrInsert (%d)\n", len(scs))
-
 	for _, sc := range scs {
 		err := coll.Find(bson.M{"ulid": sc.ULID}).One(&aux)
 		if err == mgo.ErrNotFound {
 			coll.Insert(sc)
 		} else {
-			selector := bson.M{"ulid": sc.ULID}
-			update := bson.M{"$push": bson.M{"tasks": sc.Tasks}}
-			bulk.Upsert(selector, update)
-			_, err := bulk.Run()
-			if err != nil {
-				return err
+			for _, task := range sc.Tasks {
+				selector := bson.M{"ulid": sc.ULID}
+				update := bson.M{"$push": bson.M{"tasks": task}}
+				bulk.Upsert(selector, update)
 			}
 		}
+	}
+	_, err := bulk.Run()
+	if err != nil {
+		return err
 	}
 	return nil
 }
 
 func parseDateTime(dt string) (time.Time, error) {
-	return time.Parse("02/01/2006 03:04:05 pm", dt)
+	return time.Parse("2006-01-02T15:04:05.000Z", dt)
 }
 
 func TasksDelete(ctx *context.Context) {

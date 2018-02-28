@@ -5,8 +5,7 @@ BUILD=`git rev-parse HEAD`
 LDFLAGS="-s -w \
 	-X main.Version=${VERSION} \
 	-X main.BuildID=${BUILD} \
-	-X main.BuildDate=${BUILD_TIME}\
-	-extldflags='-yara -lm'"
+	-X main.BuildDate=${BUILD_TIME}"
 
 YARA_VERSION := v3.7.1
 YARA_TAG := yara_static

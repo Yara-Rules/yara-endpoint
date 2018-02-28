@@ -18,7 +18,6 @@ import (
 	"github.com/Yara-Rules/yara-endpoint/server/config"
 	"github.com/Yara-Rules/yara-endpoint/server/database"
 	"github.com/Yara-Rules/yara-endpoint/server/models"
-	"github.com/k0kubun/pp"
 	"github.com/oklog/ulid"
 	log "github.com/sirupsen/logrus"
 )
@@ -184,7 +183,6 @@ func (s *Server) taskPicker(msg message.Message, jobs models.Schedule, db *datab
 			}
 			// Send task to endpoint
 			log.Infof("[%s] Selected task %s", msg.ULID, msg.TaskID)
-			pp.Println(msg)
 			s.w.Encode(msg)
 			return
 		}
@@ -296,7 +294,6 @@ func (s *Server) extractRules(RuleList []bson.ObjectId, db *database.DataStore) 
 
 func (s *Server) checkMsgErr(msg message.Message, state models.State, db *database.DataStore) bool {
 	log.Debugf("[%s] Check error in message", msg.ULID)
-	pp.Println(msg)
 	if msg.Error {
 		log.Errorf("[%s] %s", msg.ULID, errors.Errors[msg.ErrorID])
 		s.saveErr(msg.ULID, msg.TaskID, msg.ErrorID, db)

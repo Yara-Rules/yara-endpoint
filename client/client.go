@@ -446,7 +446,6 @@ func (c *Client) ScanPID(msg *message.Message) {
 	}
 
 	matches, err := rules.ScanProc(pid, 0, SCAN_TIMEOUT*time.Second)
-	fmt.Printf("ERR: %v", err)
 	if c.checkScanErr(msg, err, errors.ScanningPID) {
 		return
 	}

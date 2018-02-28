@@ -67,7 +67,7 @@
                             <a href="{{ URLFor "index" }}"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
                         </li>
                         <li>
-                            <a href="#"><i class="fa fa-bar-chart-o fa-fw"></i> Assets<span class="fa arrow"></span></a>
+                            <a href="#"><i class="fa fa-desktop fa-fw"></i> Assets<span class="fa arrow"></span></a>
                             <ul class="nav nav-second-level">
                                 <li>
                                     <a id="assets" href="#">List</a>
@@ -82,7 +82,7 @@
                             <!-- /.nav-second-level -->
                         </li>
                         <li>
-                            <a href="#"><i class="fa fa-table fa-fw"></i> Rules<span class="fa arrow"></span></a>
+                            <a href="#"><i class="fa fa-stethoscope fa-fw"></i> Rules<span class="fa arrow"></span></a>
                             <ul class="nav nav-second-level">
                                 <li>
                                     <a id="rules" href="#">List</a>
@@ -96,7 +96,7 @@
                             </ul>
                         </li>
                         <li>
-                            <a href="#"><i class="fa fa-edit fa-fw"></i> Tasks<span class="fa arrow"></span></a>
+                            <a href="#"><i class="fa fa-tasks fa-fw"></i> Tasks<span class="fa arrow"></span></a>
                             <ul class="nav nav-second-level">
                                 <li>
                                     <a id="tasks" href="#">List</a>
@@ -110,7 +110,7 @@
                             </ul>
                         </li>
                         <li>
-                            <a id="reports" href="#"><i class="fa fa-wrench fa-fw"></i> Reports</a>
+                            <a id="reports" href="#"><i class="fa fa-flag-checkered fa-fw"></i> Reports</a>
                         </li>
                     </ul>
                 </div>
@@ -184,7 +184,7 @@
                   <div class="panel-heading">
                       <div class="row">
                           <div class="col-xs-3">
-                              <i class="fa fa-comments fa-5x"></i>
+                              <i class="fa fa-desktop fa-5x"></i>
                           </div>
                           <div class="col-xs-9 text-right">
                               <div id="total-assets" class="huge">0</div>
@@ -199,7 +199,7 @@
                   <div class="panel-heading">
                       <div class="row">
                           <div class="col-xs-3">
-                              <i class="fa fa-tasks fa-5x"></i>
+                              <i class="fa fa-stethoscope fa-5x"></i>
                           </div>
                           <div class="col-xs-9 text-right">
                               <div id="total-rules" class="huge">0</div>
@@ -225,7 +225,7 @@
           <div class="col-lg-12">
               <div class="panel panel-default">
                   <div class="panel-heading">
-                      <i class="fa fa-bar-chart-o fa-fw"></i> Latest assets registered
+                      <i class="fa fa-clock-o fa-fw"></i> Latest assets registered
                   </div>
                   <!-- /.panel-heading -->
                   <div class="panel-body">
@@ -266,7 +266,7 @@
           <div class="col-lg-12">
               <div class="panel panel-default">
                   <div class="panel-heading">
-                      <i class="fa fa-bar-chart-o fa-fw"></i> List of assets
+                      <i class="fa fa-desktop fa-fw"></i> List of assets
                   </div>
                   <!-- /.panel-heading -->
                   <div class="panel-body">
@@ -305,7 +305,7 @@
             <% }) %>
           </td>
           <td>
-            <%= item.version %>
+            <%= item.client_version %>
           </td>
           <td>
             <button type="button" class="btn btn-warning" aria-label="Left Align"
@@ -359,7 +359,7 @@
               </div>
               <div class="row top10">
                 <div class="col-md-3"><b>Client version:</b></div>
-                <div class="col-md-9"><%= item.version %></div>
+                <div class="col-md-9"><%= item.client_version %></div>
               </div>
             </div>
             <div class="modal-footer">
@@ -378,7 +378,7 @@
           <div class="col-lg-12">
               <div class="panel panel-default">
                   <div class="panel-heading">
-                      <i class="fa fa-bar-chart-o fa-fw"></i> List of rules
+                      <i class="fa fa-stethoscope fa-fw"></i> List of rules
                   </div>
                   <!-- /.panel-heading -->
                   <div class="panel-body">
@@ -516,7 +516,7 @@
           <div class="col-lg-12">
               <div class="panel panel-default">
                   <div class="panel-heading">
-                      <i class="fa fa-bar-chart-o fa-fw"></i> List of tasks
+                      <i class="fa fa-tasks fa-fw"></i> List of tasks
                   </div>
                   <!-- /.panel-heading -->
                   <div class="panel-body">
@@ -751,7 +751,7 @@
           <div class="col-lg-12">
               <div class="panel panel-default">
                   <div class="panel-heading">
-                      <i class="fa fa-bar-chart-o fa-fw"></i> List of reports
+                      <i class="fa fa-flag-checkered fa-fw"></i> List of reports
                   </div>
                   <!-- /.panel-heading -->
                   <div class="panel-body">

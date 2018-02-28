@@ -2,10 +2,7 @@
 VERSION=v0.1.0
 BUILD_TIME=`date +%FT%T%z`
 BUILD=`git rev-parse HEAD`
-LDFLAGS=-ldflags="\
-	-s \
-	-w \
-	-X main.Name=${BINARY} \
+LDFLAGS="-s -w \
 	-X main.Version=${VERSION} \
 	-X main.BuildID=${BUILD} \
 	-X main.BuildDate=${BUILD_TIME}"

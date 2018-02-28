@@ -261,7 +261,7 @@ function loadNewTask() {
 
     $('.selectpicker').selectpicker('show');
     $('#new-task-datetime').datetimepicker({
-        format: "DD/MM/YYYY hh:mm:ss a",
+        format: "YYYY-MM-DDTHH:mm:ss.SSSZ",
         minDate: moment(),
         toolbarPlacement: "top",
         showTodayButton: true,
@@ -275,7 +275,7 @@ function loadNewTask() {
             rules: $("#new-task-rule").val(),
             command: $("#new-task-command").val(),
             target: $("#new-task-target").val(),
-            when: $("#new-task-datetime").val(),
+            when: moment($("#new-task-datetime").val()).utc(),
         }
 
         $.ajax({
