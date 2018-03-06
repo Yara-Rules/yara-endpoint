@@ -12,7 +12,8 @@ YARA_TAG := yara_static
 GO := $(shell type go)
 XGO := $(shell type xgo)
 DOCKER := $(shell type docker)
-TARGET_DIR := "build"
+TARGET_DIR := build
+OUT_NAME := yep
 
 # "yara-rules/x-go-yara"
 DOCKER_IMAGE := "x-go-yara"
@@ -35,34 +36,37 @@ endif
 # endif
 
 all:
-	xgo -image $(DOCKER_IMAGE) -tags $(YARA_TAG) -ldflags $(LDFLAGS) -dest build -out yara-endpoint-c -deps $(DEPS) -targets="linux/*,darwin/*,windows/*" .
+	xgo -image $(DOCKER_IMAGE) -tags $(YARA_TAG) -ldflags $(LDFLAGS) -dest build -out $(OUT_NAME) -deps $(DEPS) -targets="linux/*,darwin/*,windows/*" .
 
 linux:
-	xgo -image $(DOCKER_IMAGE) -tags $(YARA_TAG) -ldflags $(LDFLAGS) -dest build -out yara-endpoint-c -deps $(DEPS) -targets="linux/*" .
+	xgo -image $(DOCKER_IMAGE) -tags $(YARA_TAG) -ldflags $(LDFLAGS) -dest build -out $(OUT_NAME) -deps $(DEPS) -targets="linux/*" .
 
 linux-x86:
-	xgo -x -image $(DOCKER_IMAGE) -tags $(YARA_TAG) -ldflags $(LDFLAGS) -dest build -out yara-endpoint-c -deps $(DEPS) -targets="linux/386" .
+	xgo -x -image $(DOCKER_IMAGE) -tags $(YARA_TAG) -ldflags $(LDFLAGS) -dest build -out $(OUT_NAME) -deps $(DEPS) -targets="linux/386" .
 
 linux-x64:
-	xgo -x -image $(DOCKER_IMAGE) -tags $(YARA_TAG) -ldflags $(LDFLAGS) -dest build -out yara-endpoint-c -deps $(DEPS) -targets="linux/amd64" .
+	xgo -x -image $(DOCKER_IMAGE) -tags $(YARA_TAG) -ldflags $(LDFLAGS) -dest build -out $(OUT_NAME) -deps $(DEPS) -targets="linux/amd64" .
 
 darwin:
-	xgo -image $(DOCKER_IMAGE) -tags $(YARA_TAG) -ldflags $(LDFLAGS) -dest build -out yara-endpoint-c -deps $(DEPS) -targets="darwin/*" .
+	xgo -image $(DOCKER_IMAGE) -tags $(YARA_TAG) -ldflags $(LDFLAGS) -dest build -out $(OUT_NAME) -deps $(DEPS) -targets="darwin/*" .
 
 darwin-x86:
-	xgo -image $(DOCKER_IMAGE) -tags $(YARA_TAG) -ldflags $(LDFLAGS) -dest build -out yara-endpoint-c -deps $(DEPS) -targets="darwin/386" .
+	xgo -image $(DOCKER_IMAGE) -tags $(YARA_TAG) -ldflags $(LDFLAGS) -dest build -out $(OUT_NAME) -deps $(DEPS) -targets="darwin/386" .
 
 darwin-x64:
-	xgo -image $(DOCKER_IMAGE) -tags $(YARA_TAG) -ldflags $(LDFLAGS) -dest build -out yara-endpoint-c -deps $(DEPS) -targets="darwin/amd64" .
+	xgo -image $(DOCKER_IMAGE) -tags $(YARA_TAG) -ldflags $(LDFLAGS) -dest build -out $(OUT_NAME) -deps $(DEPS) -targets="darwin/amd64" .
 
 windows:
-	xgo -image $(DOCKER_IMAGE) -tags $(YARA_TAG) -ldflags $(LDFLAGS) -dest build -out yara-endpoint-c -deps $(DEPS) -targets="windows/*" .
+	xgo -image $(DOCKER_IMAGE) -tags $(YARA_TAG) -ldflags $(LDFLAGS) -dest build -out $(OUT_NAME) -deps $(DEPS) -targets="windows/*" .
 
 windows-x86:
-	xgo -image $(DOCKER_IMAGE) -tags $(YARA_TAG) -ldflags $(LDFLAGS) -dest build -out yara-endpoint-c -deps $(DEPS) -targets="windows/386" .
+	xgo -image $(DOCKER_IMAGE) -tags $(YARA_TAG) -ldflags $(LDFLAGS) -dest build -out $(OUT_NAME) -deps $(DEPS) -targets="windows/386" .
 
 windows-x64:
-	xgo -image $(DOCKER_IMAGE) -tags $(YARA_TAG) -ldflags $(LDFLAGS) -dest build -out yara-endpoint-c -deps $(DEPS) -targets="windows/amd64" .
+	xgo -image $(DOCKER_IMAGE) -tags $(YARA_TAG) -ldflags $(LDFLAGS) -dest build -out $(OUT_NAME) -deps $(DEPS) -targets="windows/amd64" .
+
+manual:
+	go build -o "$(TARGET_DIR)/$(OUT_NAME)" -ldflags $(LDFLAGS) .
 
 clean:
 	rm -rf $(TARGET_DIR)
