@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Yara Endpoint</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="public/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- MetisMenu CSS -->
+    <link href="public/vendor/metisMenu/metisMenu.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Select CSS -->
+    <link href="public/vendor/bootstrap-select/css/bootstrap-select.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Datatimepicker -->
+    <link href="public/vendor/bootstrap-datetimepicker/bootstrap-datetimepicker.min.css" rel="stylesheet">
+
+    <!-- Syntax Highlighter -->
+    <link href="public/vendor/highlightjs/default.min.css" rel="stylesheet">
+    <!-- <link href="public/vendor/highlightjs/github-gist.css" rel="stylesheet"> -->
+
+    <!-- Sb-Admin CSS -->
+    <link href="public/vendor/theme/sb-admin-2.css" rel="stylesheet">
+
+    <!-- Morris Charts CSS -->
+    <link href="public/vendor/morrisjs/morris.css" rel="stylesheet">
+
+    <!-- Custom Fonts -->
+    <link href="public/vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+
+    <!-- custom -->
+    <link href="public/css/custom.css" rel="stylesheet">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+    <div id="wrapper">
+        <!-- Navigation -->
+        <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="{{ URLFor "index" }}"><h4>yEP <small>{{ Version }}</small></h4></a>
+            </div>
+            <!-- /.navbar-header -->
+
+            <div class="navbar-default sidebar" role="navigation">
+                <div class="sidebar-nav navbar-collapse">
+                    <ul class="nav" id="side-menu">
+                        <li>
+                            <a href="{{ URLFor "index" }}"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
+                        </li>
+                        <li>
+                            <a href="#"><i class="fa fa-desktop fa-fw"></i> Assets<span class="fa arrow"></span></a>
+                            <ul class="nav nav-second-level">
+                                <li>
+                                    <a id="assets" href="#">List</a>
+                                </li>
+                                <li>
+                                    <a id="new-asset" href="#">New</a>
+                                </li>
+                            </ul>
+                            <!-- /.nav-second-level -->
+                        </li>
+                        <li>
+                            <a href="#"><i class="fa fa-stethoscope fa-fw"></i> Rules<span class="fa arrow"></span></a>
+                            <ul class="nav nav-second-level">
+                                <li>
+                                    <a id="rules" href="#">List</a>
+                                </li>
+                                <li>
+                                    <a id="new-rule" href="#">New</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="#"><i class="fa fa-tasks fa-fw"></i> Tasks<span class="fa arrow"></span></a>
+                            <ul class="nav nav-second-level">
+                                <li>
+                                    <a id="tasks" href="#">List</a>
+                                </li>
+                                <li>
+                                    <a id="new-task" href="#">New</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a id="reports" href="#"><i class="fa fa-flag-checkered fa-fw"></i> Reports</a>
+                        </li>
+                    </ul>
+                </div>
+                <!-- /.sidebar-collapse -->
+            </div>
+            <!-- /.navbar-static-side -->
+        </nav>
+
+        <div id="page-wrapper">
+            <div class="row">
+                <div class="col-lg-12">
+                    <h1 id="board-title" class="page-header">Dashboard</h1>
+                </div>
+                <!-- /.col-lg-12 -->
+            </div>
+            <div id="page-body">
+
+            </div>
+        </div>
+        <!-- /#page-wrapper -->
+    </div>
+    <!-- /#wrapper -->
+
+    <!-- END OF PAGE -->
+
+    <!-- jQuery -->
+    <script src="public/vendor/jquery/jquery.min.js"></script>
+
+    <!-- underscorejs -->
+    <script src="public/vendor/underscorejs/underscore-min.js"></script>
+
+    <!-- ejs -->
+    <script src="public/vendor/ejs/ejs.min.js"></script>
+
+    <!-- momentjs -->
+    <script src="public/vendor/momentjs/moment.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="public/vendor/bootstrap/js/bootstrap.min.js"></script>
+
+    <!-- Metis Menu Plugin JavaScript -->
+    <script src="public/vendor/metisMenu/metisMenu.min.js"></script>
+
+    <!-- Bootstrap Datetimepicker -->
+    <script src="public/vendor/bootstrap-datetimepicker/bootstrap-datetimepicker.min.js"></script>
+
+    <!-- Morris Charts JavaScript -->
+    <script src="public/vendor/raphael/raphael.min.js"></script>
+    <script src="public/vendor/morrisjs/morris.min.js"></script>
+
+    <!-- Custom Theme JavaScript -->
+    <script src="public/vendor/theme/sb-admin-2.js"></script>
+
+    <!-- Bootstrap Select JavaScript -->
+    <script src="public/vendor/bootstrap-select/js/bootstrap-select.min.js"></script>
+
+    <!-- Syntax Highlighter -->
+    <script src="public/vendor/highlightjs/highlight.pack.js"></script>
+
+    <!-- Custom JavaScript -->
+    <script src="public/js/yara-endpoint.js"></script>
+
+    <!-- TEMPLATES -->
+
+    <!-- dashboard -->
+    <script id="dashboard-tpl" type="text/html">
+      <!-- /.row -->
+      <div class="row">
+          <div class="col-lg-3 col-md-6 gauge">
+              <div class="panel panel-primary">
+                  <div class="panel-heading">
+                      <div class="row">
+                          <div class="col-xs-3">
+                              <i class="fa fa-desktop fa-5x"></i>
+                          </div>
+                          <div class="col-xs-9 text-right">
+                              <div id="total-assets" class="huge">0</div>
+                              <div>Total Endpoints!</div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+          <div class="col-lg-3 col-md-6 gauge">
+              <div class="panel panel-green">
+                  <div class="panel-heading">
+                      <div class="row">
+                          <div class="col-xs-3">
+                              <i class="fa fa-stethoscope fa-5x"></i>
+                          </div>
+                          <div class="col-xs-9 text-right">
+                              <div id="total-rules" class="huge">0</div>
+                              <div>Total Rules!</div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+          <div class="col-lg-3 col-md-6 gauge">
+              <div id="morris-area-chart">
+                <div id="online-chart" style="height: 150px;"></div>
+              </div>
+          </div>
+          <div class="col-lg-3 col-md-6 gauge">
+              <div id="morris-area-chart">
+                <div id="infected-chart" style="height: 150px;"></div>
+              </div>
+          </div>
+      </div>
+      <!-- /.row -->
+      <div class="row">
+          <div class="col-lg-12">
+              <div class="panel panel-default">
+                  <div class="panel-heading">
+                      <i class="fa fa-clock-o fa-fw"></i> Latest assets registered
+                  </div>
+                  <!-- /.panel-heading -->
+                  <div class="panel-body">
+                    <table class="table">
+                      <thead>
+                        <tr>
+                          <th>Date</th>
+                          <th>ULID</th>
+                          <th>Hostname</th>
+                        </tr>
+                      </thead>
+                      <tbody id="list-of-assets">
+                      </tbody>
+                    </table>
+                  </div>
+                  <!-- /.panel-body -->
+              </div>
+              <!-- /.panel -->
+          </div>
+      </div>
+      <!-- /.row -->
+    </script>
+
+    <script id="dashboard-list-of-assets-tpl" type="text/html">
+      <% $.each(d, function(idx, item){ %>
+        <tr>
+          <td><%= moment(item.created_at).format('DD-MM-YYYY h:mm:ss') %></td>
+          <td><%= item.ulid %></td>
+          <td><%= item.hostname %></td>
+        </tr>
+      <% }) %>
+    </script>
+
+    <!-- assets -->
+    <script id="list-of-assets-tpl" type="text/html">
+      <!-- /.row -->
+      <div class="row">
+          <div class="col-lg-12">
+              <div class="panel panel-default">
+                  <div class="panel-heading">
+                      <i class="fa fa-desktop fa-fw"></i> List of assets
+                  </div>
+                  <!-- /.panel-heading -->
+                  <div class="panel-body">
+                    <table class="table">
+                      <thead>
+                        <tr>
+                          <th>Date</th>
+                          <th>ULID</th>
+                          <th>Hostname</th>
+                          <th>Tags</th>
+                          <th>Version</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody id="list-of-assets">
+                      </tbody>
+                    </table>
+                  </div>
+                  <!-- /.panel-body -->
+              </div>
+              <!-- /.panel -->
+          </div>
+      </div>
+      <!-- /.row -->
+    </script>
+
+    <script id="list-of-assets-list-tpl" type="text/html">
+      <% $.each(d, function(idx, item){ %>
+        <tr>
+          <td><%= moment(item.created_at).format('DD-MM-YYYY h:mm:ss') %></td>
+          <td><%= item.ulid %></td>
+          <td><%= item.hostname %></td>
+          <td>
+            <% $.each(item.tags, function(idxx, tag) { %>
+              <span class="label label-primary"><%= tag %></span>
+            <% }) %>
+          </td>
+          <td>
+            <%= item.client_version %>
+          </td>
+          <td>
+            <button type="button" class="btn btn-warning" aria-label="Left Align"
+              data-toggle="modal" data-target="#asset-<%= idx %>-<%= item.hostname.replace(/\s/g, '').replace(/\./, '-') %>">
+                  <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
+            </button>
+            <button type="button" class="btn btn-info" aria-label="Left Align"
+              data-toggle="modal" data-target="#asset-edit-<%= idx %>-<%= item.hostname.replace(/\s/g, '').replace(/\./, '-') %>">
+                  <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+            </button>
+            <button type="button" class="btn btn-danger" aria-label="Left Align" onclick="removeAsset('<%= item.ulid %>')">
+                  <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+            </button>
+          </td>
+        </tr>
+      <% }) %>
+    </script>
+
+    <script id="new-asset-tpl" type="text/html">
+      <!-- /.row -->
+      <div class="row">
+          <div class="col-lg-12">
+              <div class="panel panel-default">
+                  <div class="panel-heading">
+                      <i class="fa fa-desktop fa-fw"></i> New Asset
+                  </div>
+                  <!-- /.panel-heading -->
+                  <div class="panel-body">
+                    <form id="submit-new-asset">
+                      <div class="form-group">
+                        <label for="hostname">Hostname:</label>
+                        <input type="text" class="form-control" id="new-asset-hostname">
+                      </div>
+                      <div class="form-group">
+                        <label for="tags">Tags <small>(comma separated)</small>:</label>
+                        <input type="text" class="form-control" id="new-asset-tags">
+                      </div>
+                      <div class="form-group">
+                        <label for="version">Client version:</label>
+                        <input type="text" class="form-control" id="new-asset-version">
+                      </div>
+                      <button type="submit" class="btn btn-default">Submit</button>
+                    </form>
+                  </div>
+                  <!-- /.form -->
+              </div>
+              <!-- /.panel -->
+          </div>
+      </div>
+      <!-- /.row -->
+    </script>
+
+    <script id="list-of-assets-modal-tpl" type="text/html">
+      <% $.each(d, function(idx, item){ %>
+        <div class="modal fade" id="asset-<%= idx %>-<%= item.hostname.replace(/\s/g, '').replace(/\./, '-') %>" tabindex="-1" role="dialog" aria-labelledby="asset-<%= idx %>">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                  <h4 class="modal-title" id="asset-<%= idx %>">Asset <%= item.hostname %></h4>
+              </div>
+              <div class="modal-body">
+                <div class="row">
+                  <div class="col-md-3"><b>Created at:</b></div>
+                  <div class="col-md-9"><%= moment(item.created_at).format('DD-MM-YYYY h:mm:ss') %></div>
+                </div>
+                <div class="row top10">
+                  <div class="col-md-3"><b>Updated at:</b></div>
+                  <div class="col-md-9"><%= moment(item.updated_at).format('DD-MM-YYYY h:mm:ss') %></div>
+                </div>
+                <div class="row top10">
+                  <div class="col-md-3"><b>ULID:</b></div>
+                  <div class="col-md-9"><%= item.ulid %></div>
+                </div>
+                <div class="row top10">
+                  <div class="col-md-3"><b>Hostname:</b></div>
+                  <div class="col-md-9"><%= item.hostname %></div>
+                </div>
+                <div class="row top10">
+                  <div class="col-md-3"><b>Tags:</b></div>
+                  <div class="col-md-9">
+                    <% $.each(item.tags, function(idxx, tag) { %>
+                      <span class="label label-primary"><%= tag %></span>
+                    <% }) %>
+                  </div>
+                </div>
+                <div class="row top10">
+                  <div class="col-md-3"><b>Client version:</b></div>
+                  <div class="col-md-9"><%= item.client_version %></div>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    </script>
+
+    <script id="list-of-assets-edit-modal-tpl" type="text/html">
+      <% $.each(d, function(idx, item){ %>
+        <div class="modal fade" id="asset-edit-<%= idx %>-<%= item.hostname.replace(/\s/g, '').replace(/\./, '-') %>" tabindex="-1" role="dialog" aria-labelledby="asset-edit-<%= idx %>">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                  <h4 class="modal-title" id="asset-edit-<%= idx %>">Edit asset <%= item.hostname %></h4>
+              </div>
+              <div class="modal-body">
+                <form id="asset-edit-form-<%= idx %>-<%= item.hostname.replace(/\s/g, '').replace(/\./, '-') %>">
+                  <input type="hidden" id="edit-asset-ulid-<%= idx %>" name="ulid" value="<%= item.ulid %>">
+                  <div class="form-group">
+                    <label for="edit-asset-<%= idx %>" class="control-label"><b>Hostname:</b></label>
+                    <input type="text" class="form-control" id="edit-asset-hostname-<%= idx %>" value="<%= item.hostname %>">
+                  </div>
+                  <div class="form-group">
+                    <label for="edit-asset-tags-<%= idx %>" class="control-label"><b>Tags <small>(comma separated)</small>:</b></label>
+                    <input type="text" class="form-control" id="edit-asset-tags-<%= idx %>" value="<% $.each(item.tags, function(idxx, tag) { %><% if (idxx !== 0) { -%>,<%= tag %><% } else { %><%= tag %><% } %><% }) %>">
+                  </div>
+                  <div class="form-group">
+                    <label for="edit-asset-version-<%= idx %>" class="control-label"><b>Client version:</b></label>
+                    <input type="text" class="form-control" id="edit-asset-version-<%= idx %>" value="<%= item.client_version %>">
+                  </div>
+                </form>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="updateAsset('<%= idx %>', 'asset-edit-<%= idx %>-<%= item.hostname.replace(/\s/g, '').replace(/\./, '-') %>')">Update</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    </script>
+
+    <!-- rules -->
+    <script id="rules-tpl" type="text/html">
+      <!-- /.row -->
+      <div class="row">
+          <div class="col-lg-12">
+              <div class="panel panel-default">
+                  <div class="panel-heading">
+                      <i class="fa fa-stethoscope fa-fw"></i> List of rules
+                  </div>
+                  <!-- /.panel-heading -->
+                  <div class="panel-body">
+                    <table class="table">
+                      <thead>
+                        <tr>
+                          <th>Updated on</th>
+                          <th>Name</th>
+                          <th>Tags</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody id="list-of-rules">
+                      </tbody>
+                    </table>
+                  </div>
+                  <!-- /.panel-body -->
+              </div>
+              <!-- /.panel -->
+          </div>
+      </div>
+      <!-- /.row -->
+    </script>
+
+    <script id="rules-list-tpl" type="text/html">
+      <% $.each(d, function(idx, item){ %>
+        <tr>
+          <td><%= moment(item.updated_at).format('DD-MM-YYYY h:mm:ss') %></td>
+          <td><%= item.name %></td>
+          <td>
+            <% $.each(item.tags, function(idxx, tag) { %>
+              <span class="label label-primary"><%= tag %></span>
+            <% }) %>
+          </td>
+          <td>
+            <button type="button" class="btn btn-warning" aria-label="Left Align"
+              data-toggle="modal" data-target="#rule-<%= idx %>-<%= item.name.replace(/\s/g, '').replace(/\./, '') %>">
+                  <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
+            </button>
+            <button type="button" class="btn btn-info" aria-label="Left Align"
+              data-toggle="modal" data-target="#rule-edit-<%= idx %>-<%= item.name.replace(/\s/g, '').replace(/\./, '') %>">
+                  <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+            </button>
+            <button type="button" class="btn btn-danger" aria-label="Left Align" onclick="removeRule('<%= item.rule_id %>')">
+                  <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+            </button>
+          </td>
+        </tr>
+      <% }) %>
+    </script>
+
+    <script id="new-rule-tpl" type="text/html">
+      <!-- /.row -->
+      <div class="row">
+          <div class="col-lg-12">
+              <div class="panel panel-default">
+                  <div class="panel-heading">
+                      <i class="fa fa-bar-chart-o fa-fw"></i> New Rule
+                  </div>
+                  <!-- /.panel-heading -->
+                  <div class="panel-body">
+                    <form id="submit-new-rule">
+                      <div class="form-group">
+                        <label for="name">Name:</label>
+                        <input type="text" class="form-control" id="new-rule-name">
+                      </div>
+                      <div class="form-group">
+                        <label for="tags">Tags (comma separated):</label>
+                        <input type="text" class="form-control" id="new-rule-tags">
+                      </div>
+                      <div class="form-group">
+                        <label for="data">Data (rule code):</label>
+                        <textarea class="form-control" rows="10" id="new-rule-data"></textarea>
+                      </div>
+                      <button type="submit" class="btn btn-default">Submit</button>
+                    </form>
+                  </div>
+                  <!-- /.form -->
+              </div>
+              <!-- /.panel -->
+          </div>
+      </div>
+      <!-- /.row -->
+    </script>
+
+    <script id="rules-modal-list-tpl" type="text/html">
+      <% $.each(d, function(idx, item){ %>
+      <div class="modal fade" id="rule-<%= idx %>-<%= item.name.replace(/\s/g, '').replace(/\./, '') %>" tabindex="-1" role="dialog" aria-labelledby="rule-modal-<%= idx %>">
+        <div class="modal-dialog modal-lg" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title" id="rule-modal-<%= idx %>">Rule set <%= item.name %></h4>
+            </div>
+            <div class="modal-body">
+              <div class="row">
+                <div class="col-md-3"><b>Rule set:</b></div>
+                <div class="col-md-9"><%= item.name %></div>
+              </div>
+              <div class="row top10">
+                <div class="col-md-3"><b>Tags:</b></div>
+                <div class="col-md-9">
+                  <% $.each(item.tags, function(idxx, tag) { %>
+                    <span class="label label-primary"><%= tag %></span>
+                  <% }) %>
+                </div>
+              </div>
+              <div class="row top10">
+                <div class="col-md-3"><b>Rule:</b></div>
+                <div class="col-md-9">
+                  <pre><code class="yara hljs"><%- item.data -%></code></pre>
+                </div>
+              </div>
+              <div class="row top10">
+                <div class="col-md-3"><b>Created at:</b></div>
+                <div class="col-md-9"><%= moment(item.created_at).format('DD-MM-YYYY h:mm:ss') %></div>
+              </div>
+              <div class="row top10">
+                <div class="col-md-3"><b>Updated at:</b></div>
+                <div class="col-md-9"><%= moment(item.updated_at).format('DD-MM-YYYY h:mm:ss') %></div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <% }) %>
+    </script>
+
+    <script id="rules-edit-modal-tpl" type="text/html">
+      <% $.each(d, function(idx, item){ %>
+      <div class="modal fade" id="rule-edit-<%= idx %>-<%= item.name.replace(/\s/g, '').replace(/\./, '') %>" tabindex="-1" role="dialog" aria-labelledby="edit-rule-modal-<%= idx %>">
+        <div class="modal-dialog modal-lg" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title" id="edit-rule-modal-<%= idx %>">Edit Rule set <%= item.name %></h4>
+            </div>
+            <div class="modal-body">
+              <form id="rule-edit-form-<%= idx %>-<%= item.name.replace(/\s/g, '').replace(/\./, '-') %>">
+                <input type="hidden" id="edit-rule-ulid-<%= idx %>" name="ulid" value="<%= item.rule_id %>">
+                <div class="form-group">
+                  <label for="edit-rule-<%= idx %>" class="control-label"><b>Rule set name:</b></label>
+                  <input type="text" class="form-control" id="edit-rule-name-<%= idx %>" value="<%= item.name %>">
+                </div>
+                <div class="form-group">
+                    <label for="edit-rule-tags-<%= idx %>" class="control-label"><b>Tags <small>(comma separated)</small>:</b></label>
+                    <input type="text" class="form-control" id="edit-rule-tags-<%= idx %>" value="<% $.each(item.tags, function(idxx, tag) { %><% if (idxx !== 0) { -%>,<%= tag %><% } else { %><%= tag %><% } %><% }) %>">
+                </div>
+                <div class="form-group">
+                  <label for="data">Data <small>(rule code)</small>:</label>
+                  <textarea class="form-control" rows="10" id="edit-rule-data-<%= idx %>"><%= item.data %></textarea>
+                </div>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary" onclick="updateRule('<%= idx %>', 'rule-edit-<%= idx %>-<%= item.name.replace(/\s/g, '').replace(/\./, '-') %>')">Update</button>
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <% }) %>
+    </script>
+
+    <!-- tasks -->
+    <script id="tasks-tpl" type="text/html">
+      <!-- /.row -->
+      <div class="row">
+          <div class="col-lg-12">
+              <div class="panel panel-default">
+                  <div class="panel-heading">
+                      <i class="fa fa-tasks fa-fw"></i> List of tasks
+                  </div>
+                  <!-- /.panel-heading -->
+                  <div class="panel-body">
+                    <table class="table">
+                      <thead>
+                        <tr>
+                          <th>Scheduled</th>
+                          <th>Asset Name</th>
+                          <th>Command</th>
+                          <th>Status</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody id="list-of-tasks">
+                      </tbody>
+                    </table>
+                  </div>
+                  <!-- /.panel-body -->
+              </div>
+              <!-- /.panel -->
+          </div>
+      </div>
+      <!-- /.row -->
+    </script>
+
+    <script id="tasks-list-tpl" type="text/html">
+      <% console.log(d) %>
+      <% $.each(d, function(idx, item) { %>
+        <% if (item.task.status === 0) { %>
+          <tr>
+        <% } else if (item.task.status === 1) { %>
+          <tr class="warning">
+        <% } else if (item.task.status === 2) { %>
+          <tr class="success">
+        <% } else { %>
+          <tr class="danger">
+        <% } %>
+            <td><%= moment(item.task.when).format('DD-MM-YYYY h:mm:ss') %></td>
+            <td><%= item.hostname %></td>
+            <td>
+              <% if (item.task.command === 4) { %>
+                Scan File
+              <% } else if (item.task.command === 5) { %>
+                Scan Dir
+              <% } else if (item.task.command === 6) { %>
+                Scan PID
+              <% } %>
+            </td>
+            <% if (item.task.status === 0) { %>
+              <td>Pending</td>
+            <% } else if (item.task.status === 1) { %>
+              <td>In Progress</td>
+            <% } else if (item.task.status === 1) { %>
+              <td>Finished</td>
+            <% } else { %>
+              <td>Error</td>
+            <% } %>
+            <td>
+              <button type="button" class="btn btn-warning" aria-label="Left Align"
+                data-toggle="modal" data-target="#task-<%= idx %>-<%= item.hostname.replace(/\s|\./g, '') %>">
+                  <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
+              </button>
+              <% if (item.task.status === 0) { %>
+              <button type="button" class="btn btn-danger" aria-label="Left Align"
+                onclick="removeTask('<%= item.ulid %>', '<%= item.task.task_id %>')">
+                    <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+              </button>
+              <% } %>
+            </td>
+          </tr>
+      <% }) %>
+    </script>
+
+    <script id="new-task-tpl" type="text/html">
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <i class="fa fa-bar-chart-o fa-fw"></i> New Schedule
+            </div>
+            <div class="panel-body">
+              <form id="submit-new-task" class="form-horizontal">
+                <div class="form-group">
+                  <label for="new-task-asset" class="col-md-2 control-label">Asset:</label>
+                  <div class="col-md-5">
+                    <select id="new-task-asset" class="selectpicker" title="Choose an asset" data-live-search="true" data-actions-box="true" multiple>
+                      <% $.each(d.assets, function(idx, item){ %>
+                        <option data-tokens="<%= item.tags.join(' ') %> <%= item.hostname %>" value="<%= item.ulid %>"><%= item.hostname %></option>
+                      <% }) %>
+                    </select>
+                  </div>
+                  <% if (_.isNull(d.assets)) { %>
+                  <div class="col-md-5">
+                    <span class="text-danger">There ara no assets, register one first.</span>
+                  </div>
+                  <% } %>
+                </div>
+                <div class="form-group">
+                  <label for="new-task-rule" class="col-md-2 control-label">Rule sets:</label>
+                  <div class="col-md-5">
+                    <select id="new-task-rule" class="selectpicker" title="Choose a rule" data-live-search="true" data-actions-box="true" multiple>
+                      <% $.each(d.rules, function(idx, item){ %>
+                        <option data-tokens="<%= item.tags.join(' ') %> <%= item.name %>"  value="<%= item.rule_id %>"><%= item.name %></option>
+                      <% }) %>
+                    </select>
+                  </div>
+                  <% if (_.isNull(d.rules)) { %>
+                  <div class="col-md-5">
+                    <span class="text-danger">There ara no rules, create one first.</span>
+                  </div>
+                  <% } %>
+                </div>
+                <div class="form-group">
+                  <label for="new-task-command" class="col-md-2 control-label">Command:</label>
+                  <div class="col-md-5">
+                    <select id="new-task-command" class="selectpicker" title="Choose a command">
+                      <% $.each(d.commands.commands, function(idx, cmd){ %>
+                        <option data-tokens="<%= cmd %>"><%= cmd %></option>
+                      <% }) %>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="new-task-datetime" class="col-md-2 control-label">Schedule at:</label>
+                  <div class="col-md-5">
+                    <div class="input-group date">
+                    <input id="new-task-datetime" type="text" class="form-control" placeholder="Choose a datetime">
+                    <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                </div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="new-task-target" class="col-md-2 control-label">Target:</label>
+                  <div class="col-md-10">
+                    <input id="new-task-target" name="target" type='text' class="form-control" placeholder="File, Folder or PID">
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-default">Submit</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </script>
+
+    <script id="task-modal-list-tpl" type="text/html">
+      <% $.each(d, function(idx, item){ %>
+      <div class="modal fade" id="task-<%= idx %>-<%= item.hostname.replace(/\s|\./g, '') %>" tabindex="-1" role="dialog" aria-labelledby="task-modal-<%= idx %>">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="task-modal-<%= idx %>">Task for <%= item.hostname %></h4>
+            </div>
+            <div class="modal-body">
+              <div class="row">
+                <div class="col-md-3"><b>Hostname:</b></div>
+                <div class="col-md-9"><%= item.hostname %></div>
+              </div>
+              <div class="row top10">
+                <div class="col-md-3"><b>ULID:</b></div>
+                <div class="col-md-9"><%= item.ulid %></div>
+              </div>
+              <div class="row top10">
+                <div class="col-md-3"><b>Task ID:</b></div>
+                <div class="col-md-9"><%= item.task.task_id %></div>
+              </div>
+              <div class="row top10">
+                <div class="col-md-3"><b>Scheduled for:</b></div>
+                <div class="col-md-9"><%= moment(item.task.when).format('DD-MM-YYYY h:mm:ss') %></div>
+              </div>
+              <div class="row top10">
+                <div class="col-md-3"><b>Command:</b></div>
+                <div class="col-md-9">
+                  <% if (item.task.command === 4) { %>
+                    Scan File
+                  <% } else if (item.task.command === 5) { %>
+                    Scan Dir
+                  <% } else if (item.task.command === 6) { %>
+                    Scan PID
+                  <% } %>
+                </div>
+              </div>
+              <div class="row top10">
+                <div class="col-md-3"><b>Status:</b></div>
+                <div class="col-md-9">
+                  <% if (item.task.status === 0) { %>
+                    Pending
+                  <% } else if (item.task.status === 1) { %>
+                    Running
+                  <% } else { %>
+                    Error
+                  <% } %>
+                </div>
+              </div>
+              <div class="row top10">
+                <div class="col-md-3"><b>Rule sets:</b></div>
+                <div class="col-md-9">
+                  <ul>
+                    <% $.each(item.task.rules, function(idxx, rule_name) { %>
+                      <li><%= rule_name %></li>
+                    <% }) %>
+                  </ul>
+                </div>
+              </div>
+              <div class="row top10">
+                <div class="col-md-3"><b>Created at:</b></div>
+                <div class="col-md-9"><%= moment(item.task.created_at).format('DD-MM-YYYY h:mm:ss') %></div>
+              </div>
+              <div class="row top10">
+                <div class="col-md-3"><b>Updated at:</b></div>
+                <div class="col-md-9"><%= moment(item.task.updated_at).format('DD-MM-YYYY h:mm:ss') %></div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <% }) %>
+    </script>
+
+
+    <!-- reports -->
+    <script id="reports-tpl" type="text/html">
+      <!-- /.row -->
+      <div class="row">
+          <div class="col-lg-12">
+              <div class="panel panel-default">
+                  <div class="panel-heading">
+                      <i class="fa fa-flag-checkered fa-fw"></i> List of reports
+                  </div>
+                  <!-- /.panel-heading -->
+                  <div class="panel-body">
+                    <table class="table">
+                      <thead>
+                        <tr>
+                          <th>Asset name</th>
+                          <th>Numner of reports</th>
+                          <th>Last resport</th>
+                          <th>Acctions</th>
+                        </tr>
+                      </thead>
+                      <tbody id="list-of-reports">
+                      </tbody>
+                    </table>
+                  </div>
+                  <!-- /.panel-body -->
+              </div>
+              <!-- /.panel -->
+          </div>
+      </div>
+      <!-- /.row -->
+    </script>
+
+    <script id="reports-list-tpl" type="text/html">
+      <% $.each(d, function(idx, item) { %>
+        <tr>
+          <td><%= item.hostname %></td>
+          <td><%= item.reports.length %></td>
+          <td><%= moment(item.updated_at).format('DD-MM-YYYY h:mm:ss') %></td>
+          <td>
+            <button type="button" class="btn btn-warning" aria-label="Left Align"
+          data-toggle="modal" data-target="#report-<%= idx %>-<% item.hostname.replace(/\s/g, '') %>">
+              <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
+          </button>
+          </td>
+        </tr>
+      <% }) %>
+    </script>
+
+    <script id="reports-modal-list-tpl" type="text/html">
+      <% $.each(d, function(idx, item){ %>
+        <div class="modal fade" id="report-<%= idx %>-<% item.hostname.replace(/\s/g, '') %>" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+          <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Report for <%= item.hostname %></h4>
+              </div>
+              <div class="modal-body">
+                <% $.each(item.reports, function(idxx, report) { %>
+                  <% if (idxx !== 0) { %>
+                    <hr>
+                  <% } %>
+                  <div class="row top10">
+                    <div class="col-md-12 text-center">
+                      <h3>Report Info</h3>
+                    </div>
+                  </div>
+                  <div class="row top10">
+                    <div class="col-md-3"><b>Report ID:</b></div>
+                    <div class="col-md-9"><%= report.report_id %></div>
+                  </div>
+                  <div class="row top10">
+                    <div class="col-md-3"><b>Created at:</b></div>
+                    <div class="col-md-9"><%= moment(report.created_at).format('DD-MM-YYYY h:mm:ss') %></div>
+                  </div>
+                  <hr />
+                  <div class="row top10">
+                    <div class="col-md-12 text-center">
+                      <h4>Task Info</h4>
+                    </div>
+                  </div>
+                  <div class="row top10">
+                    <div class="col-md-3"><b>Command:</b></div>
+                    <div class="col-md-9">
+                      <% if (report.task.command === 4) { %>
+                      Scan File
+                      <% } else if (report.task.command === 5) { %>
+                      Scan Dir
+                      <% } else if (report.task.command === 6) { %>
+                      Scan PID
+                      <% } %>
+                    </div>
+                  </div>
+                  <div class="row top10">
+                    <div class="col-md-3"><b>Target:</b></div>
+                    <div class="col-md-9"><%= report.task.params %></div>
+                  </div>
+                  <div class="row top10">
+                    <div class="col-md-3"><b>Rule set:</b></div>
+                    <div class="col-md-9">
+                      <ul>
+                        <% $.each(report.task.rules, function(x, rule_name) { %>
+                          <li><%= rule_name %></li>
+                        <% }) %>
+                      </ul>
+                    </div>
+                  </div>
+                  <hr />
+                  <div class="row top10">
+                    <div class="col-md-12 text-center">
+                      <h4>Results</h4>
+                    </div>
+                  </div>
+                  <% if (report.results.length === 0) { %>
+                    <div class="row top10">
+                      <div class="col-md-12 text-center">
+                        No matches
+                      </div>
+                    </div>
+                  <% } else { %>
+                    <% var results = _.groupBy(report.results, function(res){return res.file}) %>
+                    <% $.each(results, function(file, result){ %>
+                      <div class="row top10">
+                        <div class="col-md-3"><b>File or PID:</b></div>
+                        <div class="col-md-9"><%= file %></div>
+                      </div>
+                      <div class="row top10">
+                        <div class="col-md-3"><b>Rules Matching:</b></div>
+                        <div class="col-md-9">
+                          <% $.each(result, function(idxxx, ress){ %>
+                            <span class="label label-danger"><%= ress.rule_name %></span>
+                          <% }) %>
+                        </div>
+                      </div>
+                    <% }) %>
+                  <% } %>
+                <% }) %>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    </script>
+
+    <!-- ENTRYPOINT -->
+    <script type="text/javascript">
+
+      (function($) {
+        $("#assets").click(loadListOfAssets);
+        $("#new-asset").click(loadNewAsset);
+        $("#rules").click(loadRules);
+        $("#new-rule").click(loadNewRule);
+        $("#tasks").click(loadTasks);
+        $("#new-task").click(loadNewTask);
+        $("#reports").click(loadReports);
+        renderDashboard();
+        hljs.initHighlightingOnLoad();
+      }(jQuery));
+
+    </script>
+
+    <span id="modals"></span>
+</body>
+
+</html>
