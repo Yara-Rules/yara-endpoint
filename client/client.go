@@ -34,6 +34,12 @@ type Client struct {
 	Config
 }
 
+const (
+	WAIT_BETWEEN_PING  = 5
+	NUM_REGISTRY_TRIES = 3
+	SCAN_TIMEOUT       = 60
+)
+
 // NewClient returns a new empty Yara-Endpoint client.
 func NewClient(ip, port string) *Client {
 	return &Client{
@@ -90,8 +96,8 @@ func (c *Client) receive() (*message.Message, error) {
 	return msg, nil
 }
 
-// receiveWithMessage gets a message back from the Yara-Endpoint server.
-// Moreover it populates `msg` with the response data.
+// receiveWithMessage gets a response message from the Yara-Endpoint server.
+// Moreover it populates `msg` with previous data.
 func (c *Client) receiveWithMessage(msg *message.Message) error {
 	c.Lock()
 	defer c.Unlock()
@@ -188,7 +194,7 @@ func (c *Client) saveConfig(ulid string) error {
 	return nil
 }
 
-// sendPing
+// sendPing performs a propper ping, creates a new message with the ping command
 func (c *Client) sendPing() (*message.Message, error) {
 	log.Debug("Sending ping to the server")
 	m := message.NewMessage()
@@ -202,104 +208,105 @@ func (c *Client) sendPing() (*message.Message, error) {
 	return m, err
 }
 
-func (c *Client) validateMsgFields(msg *message.Message) {
+// validateMsgFields validates the minimal values that are needed from server messages
+func (c *Client) validateMsgFields(msg *message.Message) error {
 	log.Debug("Validating invalid fields in the message")
 	if msg.TaskID == "" {
 		log.Warn("Field TaskID is empty, sending error back")
-		// Error
 		msg.Error = true
 		msg.ErrorMsg = errors.Errors[errors.TaskIDNotProvided]
 		c.sendAndPrintMsg(msg)
-		// TODO: Check the response, it may contain what to do next
+		return fmt.Errorf("No TaskID provided")
 	}
 	if msg.Params == "" {
 		log.Warn("Field Param is empty, sending error back")
-		// Error
 		msg.Error = true
 		msg.ErrorMsg = errors.Errors[errors.ParamsNotProvided]
 		c.sendAndPrintMsg(msg)
-		// TODO: Check the response, it may contain what to do next
+		return fmt.Errorf("No Params provided")
 	}
 	if msg.Data == "" {
 		log.Warn("Field Data is empty, sending error back")
-		// Error
 		msg.Error = true
 		msg.ErrorMsg = errors.Errors[errors.DataNotProvided]
 		c.sendAndPrintMsg(msg)
-		// TODO: Check the response, it may contain what to do next
+		return fmt.Errorf("No Data provided")
 	}
+	return nil
 }
 
+// checkCompilerErr checks whether error occur when compiling Yara rules.
+// If there is an error a error message is sent to the server.
 func (c *Client) checkCompilerErr(msg *message.Message, err error) bool {
 	if err != nil {
 		log.Warnf("Yara compiler says %s, sending error back", err)
-		// Error
 		msg.Error = true
 		msg.ErrorMsg = errors.Errors[errors.UnableToGetYaraCompiler]
 		msg.ErrorID = errors.UnableToGetYaraCompiler
 		c.sendAndPrintMsg(msg)
-		// TODO: Check the response, it may contain what to do next
 		return true
 	}
 	return false
 }
 
+// checkGetRulesErr checks whether error occur when getting compiled rules from Go-Yara compiler
+// If there is an error a error message is sent to the server.
 func (c *Client) checkGetRulesErr(msg *message.Message, err error) bool {
 	if err != nil {
 		log.Warnf("Yara cannot get rules because %s, sending error back", err)
-		// Error
 		msg.Error = true
 		msg.ErrorMsg = errors.Errors[errors.UnableToGetRulesFromYaraCompiler]
 		msg.ErrorID = errors.UnableToGetRulesFromYaraCompiler
 		c.sendAndPrintMsg(msg)
-		// TODO: Check the response, it may contain what to do next
 		return true
 	}
 	return false
 }
 
+// checkFileExistErr checks whether a file exist
+// If file does not exist a error message is sent to the server.
 func (c *Client) checkFileExistErr(msg *message.Message, err error) bool {
 	if os.IsNotExist(err) {
 		log.Warn("Unable to find the file, sending error back")
-		// Error
 		msg.Error = true
 		msg.ErrorMsg = errors.Errors[errors.FileDoesNotExist]
 		msg.ErrorID = errors.FileDoesNotExist
 		c.sendAndPrintMsg(msg)
-		// TODO: Check the response, it may contain what to do next
 		return true
 	}
 	return false
 }
 
+// checkScanErr checks whether a scan command failed
+// If scan command has failed a error message is sent to the server.
 func (c *Client) checkScanErr(msg *message.Message, err error, errorID errors.Error) bool {
 	if err != nil {
 		log.Warn("Error while scanning, sending error back")
-		// Error
 		msg.Error = true
 		msg.ErrorMsg = errors.Errors[errorID]
 		msg.ErrorID = errorID
 		c.sendAndPrintMsg(msg)
-		// TODO: Check the response, it may contain what to do next
 		return true
 	}
 	return false
 }
 
+// checkMsgErr checks whether empty message has been received from the server
+// If empty message or EOF has been received, a error message is sent to the server.
 func (c *Client) checkMsgErr(msg *message.Message, err error) bool {
 	if err != nil && fmt.Sprintf("%s", err) != "EOF" {
 		log.Warn("Got an empty or EOF message from server, sending error back")
-		// Error
 		msg.Error = true
 		msg.ErrorMsg = errors.Errors[errors.SendingMsg]
 		msg.ErrorID = errors.SendingMsg
 		c.sendAndPrintMsg(msg)
-		// TODO: Check the response, it may contain what to do next
 		return true
 	}
 	return false
 }
 
+// sendAndPrintMsg sends a message to the server.
+// If found error either sending or receiving a message, then log the error
 func (c *Client) sendAndPrintMsg(msg *message.Message) {
 	log.Debug("Sending message to the server and print it out")
 	err := c.sendAndReceive(msg)
@@ -308,11 +315,13 @@ func (c *Client) sendAndPrintMsg(msg *message.Message) {
 	}
 }
 
-// ScanFile
+// ScanFile performs a scan file command
 func (c *Client) ScanFile(msg *message.Message) {
 	log.Debug("Running ScanFile routine.")
 
-	c.validateMsgFields(msg)
+	if c.validateMsgFields(msg) != nil {
+		return
+	}
 
 	comp, err := yara.NewCompiler()
 	if c.checkCompilerErr(msg, err) {
@@ -350,11 +359,13 @@ func (c *Client) ScanFile(msg *message.Message) {
 	}
 }
 
-// ScanDir
+// ScanDir performs a scan directory command
 func (c *Client) ScanDir(msg *message.Message) {
 	log.Debug("Running ScanDir routine.")
 
-	c.validateMsgFields(msg)
+	if c.validateMsgFields(msg) != nil {
+		return
+	}
 
 	comp, err := yara.NewCompiler()
 	if c.checkCompilerErr(msg, err) {
@@ -409,11 +420,13 @@ func (c *Client) ScanDir(msg *message.Message) {
 	}
 }
 
-// ScanPID
+// ScanPID performs a scan PID command
 func (c *Client) ScanPID(msg *message.Message) {
 	log.Debug("Running ScanPID routine.")
 
-	c.validateMsgFields(msg)
+	if c.validateMsgFields(msg) != nil {
+		return
+	}
 
 	comp, err := yara.NewCompiler()
 	if c.checkCompilerErr(msg, err) {
@@ -465,7 +478,7 @@ func (c *Client) ScanPID(msg *message.Message) {
 	}
 }
 
-// Ping
+// Ping performs a ping command
 func (c *Client) Ping() *message.Message {
 	log.Info("Sending PING command")
 
@@ -476,7 +489,7 @@ func (c *Client) Ping() *message.Message {
 	return msg
 }
 
-// RegisterEndpoint
+// RegisterEndpoint performs the registration
 func (c *Client) RegisterEndpoint() {
 	log.Debug("Running RegisterEndpoint routine.")
 	var err error

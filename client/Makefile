@@ -8,7 +8,7 @@ LDFLAGS="-s -w \
 	-X main.BuildDate=${BUILD_TIME}"
 
 YARA_VERSION := v3.7.1
-YARA_TAG := yara_static
+YARA_TAG := yara3.7
 GO := $(shell type go)
 XGO := $(shell type xgo)
 DOCKER := $(shell type docker)

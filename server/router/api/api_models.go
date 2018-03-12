@@ -21,15 +21,7 @@ type PublicDashboard struct {
 type PublicTasks struct {
 	ULID     string `json:"ulid"`
 	Hostname string `json:"hostname"`
-	Task     struct {
-		TaskID   string          `json:"task_id"`
-		Command  command.Command `json:"command"`
-		Rules    []string        `json:"rules"`
-		When     time.Time       `json:"when"`
-		Status   models.State    `json:"status"`
-		CreateAt time.Time       `json:"created_at"`
-		UpdateAt time.Time       `json:"updated_at"`
-	} `json:"task"`
+	Task     Task   `json:"task"`
 }
 
 // Report collection
@@ -74,10 +66,28 @@ type YString struct {
 	Offset uint64 `json:"offset"`
 }
 
+type NewAssetForm struct {
+	Hostname      string   `json:"hostname".      binding:"Required"`
+	ClientVersion string   `json:"client_version" binding:"Required"`
+	Tags          []string `json:"tags"           binding:"Required"`
+}
+
+type EditAssetForm struct {
+	Hostname      string   `json:"hostname"       binding:"Required"`
+	ClientVersion string   `json:"client_version" binding:"Required"`
+	Tags          []string `json:"tags"           binding:"Required"`
+}
+
 type NewRuleForm struct {
 	Name string   `json:"name" binding:"Required"`
-	Tags []string `json:"tags"`
 	Data string   `json:"data" binding:"Required"`
+	Tags []string `json:"tags"`
+}
+
+type EditRuleForm struct {
+	Name string   `json:"name" binding:"Required"`
+	Data string   `json:"data" binding:"Required"`
+	Tags []string `json:"tags" binding:"Required"`
 }
 
 type NewTaskForm struct {

@@ -55,6 +55,7 @@ func init() {
 func main() {
 	// Parse command line flags
 	flag.Parse()
+	validateFlags()
 	setLog()
 	log.Infof("** Yara-Endpoint Server %s **", Version)
 
@@ -70,7 +71,7 @@ func main() {
 
 	// Setting up WEB Server
 	log.Info("Starting WEB Server")
-	m := router.NewMacaron()
+	m := router.NewMacaron(Version)
 	router.RegisterRoutes(m)
 
 	// Forking WEB Server
@@ -90,6 +91,12 @@ func main() {
 		}
 		log.Debugf("New connection accepted from %s", conn.RemoteAddr())
 		go srv.HandleClient()
+	}
+}
+
+func validateFlags() {
+	if ShowVersion {
+		printVerion()
 	}
 }
 

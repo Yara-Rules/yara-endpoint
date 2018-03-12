@@ -22,6 +22,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// Server represents a server object
 type Server struct {
 	conn net.Conn
 	w    *gob.Encoder
@@ -29,10 +30,12 @@ type Server struct {
 	L    net.Listener
 }
 
+// NewServer returns an new empty server
 func NewServer() *Server {
 	return &Server{}
 }
 
+// Connect bind the server to a TCP address:port defined in the configuration
 func (s *Server) Connect(c *config.Config) {
 	tcpAddr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", c.TCPServer.Addr, c.TCPServer.Port))
 	checkErr(err)
@@ -41,10 +44,12 @@ func (s *Server) Connect(c *config.Config) {
 	checkErr(err)
 }
 
+// Close closes the connection
 func (s *Server) Close() {
 	s.conn.Close()
 }
 
+// Accept accepts an input connection
 func (s *Server) Accept() (net.Conn, error) {
 	var err error
 	s.conn, err = s.L.Accept()
@@ -56,6 +61,7 @@ func (s *Server) Accept() (net.Conn, error) {
 	return s.conn, err
 }
 
+// HandleClient this is the main handler function, here is where all the action happens
 func (s *Server) HandleClient() {
 	defer s.Close()
 
@@ -111,6 +117,7 @@ func (s *Server) HandleClient() {
 	}
 }
 
+// processRegister process the registration
 func (s *Server) processRegister(msg message.Message, db *database.DataStore) {
 	log.Debugf("[%s] Processing register command", msg.ULID)
 
@@ -133,6 +140,10 @@ func (s *Server) processRegister(msg message.Message, db *database.DataStore) {
 	s.w.Encode(msg)
 }
 
+// processPing process a ping command. This is:
+// - Update the asset
+// - Look for pending taks
+// - Send task or ping
 func (s *Server) processPing(msg message.Message, db *database.DataStore) {
 	log.Debugf("[%s] Processing ping command", msg.ULID)
 
@@ -151,6 +162,7 @@ func (s *Server) processPing(msg message.Message, db *database.DataStore) {
 	}
 }
 
+// taskPicker select one of the pending task
 func (s *Server) taskPicker(msg message.Message, jobs models.Schedule, db *database.DataStore) {
 	log.Debugf("[%s] Picking up a task ", msg.ULID)
 	for _, job := range jobs.Tasks {
@@ -164,12 +176,7 @@ func (s *Server) taskPicker(msg message.Message, jobs models.Schedule, db *datab
 
 			// Update Task to running
 			err := s.updateTaskStatus(msg, models.Running, db)
-			// selector := bson.M{"$and": []bson.M{
-			// 	bson.M{"ulid": msg.ULID},
-			// 	bson.M{"tasks": bson.M{"$elemMatch": bson.M{"task_id": msg.TaskID}}}}}
-			// update := bson.M{"$set": bson.M{"tasks.$.status": models.Running}}
 
-			// err := db.C(models.Schedules).Update(selector, update)
 			if err == mgo.ErrCursor || err == mgo.ErrNotFound {
 				// Track error
 				log.Errorf("[%s] %s", msg.ULID, errors.Errors[errors.UnableToUpdateDB])
@@ -194,6 +201,7 @@ func (s *Server) taskPicker(msg message.Message, jobs models.Schedule, db *datab
 	return
 }
 
+// processScanFile process the response of the ScanFile command.
 func (s *Server) processScanFile(msg message.Message, db *database.DataStore) {
 	log.Debugf("[%s] Processing ScanFile response", msg.ULID)
 	if s.checkMsgErr(msg, models.Failed, db) {
@@ -214,6 +222,7 @@ func (s *Server) processScanFile(msg message.Message, db *database.DataStore) {
 	s.w.Encode(msg)
 }
 
+// processScanDir process the response of the ScanDir command
 func (s *Server) processScanDir(msg message.Message, db *database.DataStore) {
 	log.Debugf("[%s] Processing ScanDir response", msg.ULID)
 	if s.checkMsgErr(msg, models.Failed, db) {
@@ -234,6 +243,7 @@ func (s *Server) processScanDir(msg message.Message, db *database.DataStore) {
 	s.w.Encode(msg)
 }
 
+// processScanPID process the response of the ScanPID command
 func (s *Server) processScanPID(msg message.Message, db *database.DataStore) {
 	log.Debugf("[%s] Processing ScanPID response", msg.ULID)
 	if s.checkMsgErr(msg, models.Failed, db) {
@@ -254,6 +264,7 @@ func (s *Server) processScanPID(msg message.Message, db *database.DataStore) {
 	s.w.Encode(msg)
 }
 
+// sendErrorMsg this is a wrapper to send error messages
 func (s *Server) sendErrorMsg(msg message.Message, e errors.Error, r string) {
 	log.Debugf("[%s] Sending error message", msg.ULID)
 	msg.Result = r
@@ -266,6 +277,7 @@ func (s *Server) sendErrorMsg(msg message.Message, e errors.Error, r string) {
 	s.w.Encode(msg)
 }
 
+// pendingJobs tells whether there is a pending job or not
 func (s *Server) pendingJobs(msg message.Message, db *database.DataStore) (models.Schedule, bool) {
 	log.Debugf("[%s] Has it pending jobs?", msg.ULID)
 	var schedule models.Schedule
@@ -278,6 +290,7 @@ func (s *Server) pendingJobs(msg message.Message, db *database.DataStore) (model
 	return schedule, true
 }
 
+// extractRules gets the needed rules for the task
 func (s *Server) extractRules(RuleList []bson.ObjectId, db *database.DataStore) string {
 	var rules string = ""
 	var rule models.Rule
@@ -292,6 +305,7 @@ func (s *Server) extractRules(RuleList []bson.ObjectId, db *database.DataStore) 
 	return rules
 }
 
+// checkMsgErr checks whether the message has an error
 func (s *Server) checkMsgErr(msg message.Message, state models.State, db *database.DataStore) bool {
 	log.Debugf("[%s] Check error in message", msg.ULID)
 	if msg.Error {
@@ -306,6 +320,7 @@ func (s *Server) checkMsgErr(msg message.Message, state models.State, db *databa
 	return false
 }
 
+// saveErr saves the error in the DB
 func (s *Server) saveErr(ulid, taskID string, err errors.Error, db *database.DataStore) {
 	log.Debugf("[%s] Saving error for TaskID: %s", ulid, taskID)
 	e := &models.Error{
@@ -318,6 +333,7 @@ func (s *Server) saveErr(ulid, taskID string, err errors.Error, db *database.Dat
 	db.C(models.Errors).Insert(e)
 }
 
+// saveResult saves the command's result into DB
 func (s *Server) saveResult(msg message.Message, db *database.DataStore) bool {
 	log.Debugf("[%s] Saving result for TaskID %s", msg.ULID, msg.TaskID)
 	var r models.Report
@@ -395,6 +411,7 @@ func (s *Server) saveResult(msg message.Message, db *database.DataStore) bool {
 	return true
 }
 
+// extractTask extract the task to be send it to the server
 func (s *Server) extractTask(ulid, taskID string, db *database.DataStore) models.Task {
 	var schedule models.Schedule
 	err := db.C(models.Schedules).Find(bson.M{"ulid": ulid}).One(&schedule)
@@ -430,6 +447,7 @@ func (s *Server) extractTask(ulid, taskID string, db *database.DataStore) models
 	return task
 }
 
+// updateTaskStatus updates the task status
 func (s *Server) updateTaskStatus(msg message.Message, status models.State, db *database.DataStore) error {
 	selector := bson.M{"$and": []bson.M{
 		bson.M{"ulid": msg.ULID},
@@ -442,12 +460,14 @@ func (s *Server) updateTaskStatus(msg message.Message, status models.State, db *
 	return db.C(models.Schedules).Update(selector, update)
 }
 
+// newULID generates a new ULID
 func newULID() ulid.ULID {
 	t := time.Now()
 	entropy := rand.New(rand.NewSource(t.UnixNano()))
 	return ulid.MustNew(ulid.Timestamp(t), entropy)
 }
 
+// checkErr checks whether error exist and quits
 func checkErr(err error) {
 	if err != nil {
 		fmt.Println("Fatal error ", err.Error())

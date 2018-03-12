@@ -15,49 +15,33 @@ import (
 
 const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
-func NewMacaron() *macaron.Macaron {
+func NewMacaron(version string) *macaron.Macaron {
 	m := macaron.New()
 	m.Use(macaron.Logger())
 	m.Use(macaron.Recovery())
 	m.Use(context.Contexter())
 	m.Use(session.Sessioner())
-	// m.Use(macaron.Context())
 	m.Use(csrf.Csrfer(csrf.Options{
-		// The global secret value used to generate Tokens. Default is a random string.
-		Secret: randStringBytes(15),
-		// HTTP header used to set and get token. Default is "X-CSRFToken".
-		Header: "X-CSRF-Token",
-		// Form value used to set and get token. Default is "_csrf".
-		Form: "_csrf",
-		// Cookie value used to set and get token. Default is "_csrf".
-		Cookie: "_csrf",
-		// Cookie path. Default is "/".
+		Secret:     randStringBytes(15),
+		Header:     "X-CSRF-Token",
+		Form:       "_csrf",
+		Cookie:     "_csrf",
 		CookiePath: "/",
-		// Key used for getting the unique ID per user. Default is "uid".
 		SessionKey: "csrf",
-		// If true, send token via header. Default is false.
-		SetHeader: true,
-		// If true, send token via cookie. Default is false.
-		SetCookie: false,
-		// Set the Secure flag to true on the cookie. Default is false.
-		Secure: true,
-		// Disallow Origin appear in request header. Default is false.
-		Origin: false,
-		// The function called when Validate fails. Default is a simple error print.
+		SetHeader:  true,
+		SetCookie:  false,
+		Secure:     true,
+		Origin:     false,
 		ErrorFunc: func(w http.ResponseWriter) {
 			http.Error(w, "Invalid csrf token.", http.StatusBadRequest)
 		},
 	}))
 	m.Use(macaron.Renderer(macaron.RenderOptions{
 		Funcs: []template.FuncMap{map[string]interface{}{
-			"URLFor": m.URLFor,
+			"URLFor":  m.URLFor,
+			"Version": func() string { return version },
 		}},
 	}))
-	// m.Use(tplextender.CompoRender(tplextender.RenderOptions{
-	//     Funcs: map[string]interface{}{
-	//         "URLFor": m.URLFor,
-	//     },
-	// }))
 	m.Use(macaron.Static("public", macaron.StaticOptions{
 		Prefix:      "public",
 		SkipLogging: false,

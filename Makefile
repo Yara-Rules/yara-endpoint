@@ -68,6 +68,10 @@ windows-x64:
 	make -C client windows-x64
 	make -C server windows-x64
 
+manual:
+	make -C client manual
+	make -C server manual
+
 clean:
 	make -C client clean
 	make -C server clean

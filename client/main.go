@@ -31,22 +31,21 @@ var (
 	// Cinfiguration file
 	configFileName = "yara-endpoint.ini"
 
-	// Log stuff
+	/*** Log stuff ***/
+
 	// logLevel
 	logLevel = "info"
+
 	// logOutput
 	logOutput = "-"
+
 	// logFormat
 	logFormat = "json"
 
+	/*****************/
+
 	// ShowVersion show up the version
 	ShowVersion = false
-)
-
-const (
-	WAIT_BETWEEN_PING  = 5
-	NUM_REGISTRY_TRIES = 3
-	SCAN_TIMEOUT       = 60
 )
 
 func printVerion() {

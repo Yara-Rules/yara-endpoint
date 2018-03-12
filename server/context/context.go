@@ -44,29 +44,6 @@ func Contexter() macaron.Handler {
 		ctx.DBSess = sess
 		ctx.DB = database.GetDb(sess)
 
-		// Get user from session if logged in.
-		// ctx.User, ctx.IsBasicAuth = auth.SignedInUser(ctx.Context, ctx.Session)
-
-		// if ctx.User != nil {
-		//  ctx.IsSigned = true
-		//  ctx.Data["IsSigned"] = ctx.IsSigned
-		//  ctx.Data["SignedUser"] = ctx.User
-		//  ctx.Data["SignedUserID"] = ctx.User.ID
-		//  ctx.Data["SignedUserName"] = ctx.User.Name
-		//  ctx.Data["IsAdmin"] = ctx.User.IsAdmin
-		// } else {
-		//  ctx.Data["SignedUserID"] = 0
-		//  ctx.Data["SignedUserName"] = ""
-		// }
-
-		// If request sends files, parse them here otherwise the Query() can't be parsed and the CsrfToken will be invalid.
-		// if ctx.Req.Method == "POST" && strings.Contains(ctx.Req.Header.Get("Content-Type"), "multipart/form-data") {
-		// 	if err := ctx.Req.ParseMultipartForm(config.AttachmentMaxSize << 20); err != nil && !strings.Contains(err.Error(), "EOF") { // 32MB max size
-		// 		ctx.Handle(500, "ParseMultipartForm", err)
-		// 		return
-		// 	}
-		// }
-
 		c.Map(ctx)
 	}
 }
