@@ -47,7 +47,8 @@ The final binary will be located in the build folder.
 ## Installation
 There is no need to install anything from Yara-Enpoint side as long as you meet the requirements.
 
-**REMEMBER**
+:warning:**REMEMBER**:warning:
+
 This project is under heavy development and a lot of things can change before releasing a final o stable version.
 
 ## Contributing
