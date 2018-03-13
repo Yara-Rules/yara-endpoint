@@ -21,6 +21,7 @@ const (
 	NeedsRegister
 	UnableToUpdateDB
 	PIDProcessNotFound
+	YaraRuleCompiled
 )
 
 var Errors = map[Error]string{
@@ -42,4 +43,5 @@ var Errors = map[Error]string{
 	NeedsRegister:                    "Register first",
 	UnableToUpdateDB:                 "Unable to update DB",
 	PIDProcessNotFound:               "PID Process not found",
+	YaraRuleCompiled:                 "Error while compiling Yara rule",
 }

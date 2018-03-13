@@ -235,9 +235,9 @@ func (c *Client) validateMsgFields(msg *message.Message) error {
 	return nil
 }
 
-// checkCompilerErr checks whether error occur when compiling Yara rules.
+// checkYaraCompilerErr checks whether error occur when compiling Yara rules.
 // If there is an error a error message is sent to the server.
-func (c *Client) checkCompilerErr(msg *message.Message, err error) bool {
+func (c *Client) checkYaraCompilerErr(msg *message.Message, err error) bool {
 	if err != nil {
 		log.Warnf("Yara compiler says %s, sending error back", err)
 		msg.Error = true
@@ -249,7 +249,7 @@ func (c *Client) checkCompilerErr(msg *message.Message, err error) bool {
 	return false
 }
 
-// checkGetRulesErr checks whether error occur when getting compiled rules from Go-Yara compiler
+// checkGetRulesErr checks whether error occur when getting the compiled rules from Go-Yara compiler
 // If there is an error a error message is sent to the server.
 func (c *Client) checkGetRulesErr(msg *message.Message, err error) bool {
 	if err != nil {
@@ -305,6 +305,20 @@ func (c *Client) checkMsgErr(msg *message.Message, err error) bool {
 	return false
 }
 
+// checkYaraRulesErr checks whether error occur while compiling rules from Go-Yara compiler
+// If there is an error a error message is sent to the server.
+func (c *Client) checkYaraRulesErr(msg *message.Message, yc *yara.Compiler) bool {
+	if len(yc.Errors) > 0 {
+		log.Warn("Got an error while compiling yara rules")
+		msg.Error = true
+		msg.ErrorMsg = errors.Errors[errors.YaraRuleCompiled]
+		msg.ErrorID = errors.YaraRuleCompiled
+		c.sendAndPrintMsg(msg)
+		return true
+	}
+	return false
+}
+
 // sendAndPrintMsg sends a message to the server.
 // If found error either sending or receiving a message, then log the error
 func (c *Client) sendAndPrintMsg(msg *message.Message) {
@@ -324,11 +338,15 @@ func (c *Client) ScanFile(msg *message.Message) {
 	}
 
 	comp, err := yara.NewCompiler()
-	if c.checkCompilerErr(msg, err) {
+	if c.checkYaraCompilerErr(msg, err) {
 		return
 	}
 
 	comp.AddString(msg.Data, "")
+	if c.checkYaraRulesErr(msg, comp) {
+		return
+	}
+
 	rules, err := comp.GetRules()
 	if c.checkGetRulesErr(msg, err) {
 		return
@@ -368,11 +386,15 @@ func (c *Client) ScanDir(msg *message.Message) {
 	}
 
 	comp, err := yara.NewCompiler()
-	if c.checkCompilerErr(msg, err) {
+	if c.checkYaraCompilerErr(msg, err) {
 		return
 	}
 
 	comp.AddString(msg.Data, "")
+	if c.checkYaraRulesErr(msg, comp) {
+		return
+	}
+
 	rules, err := comp.GetRules()
 	if c.checkGetRulesErr(msg, err) {
 		return
@@ -429,11 +451,15 @@ func (c *Client) ScanPID(msg *message.Message) {
 	}
 
 	comp, err := yara.NewCompiler()
-	if c.checkCompilerErr(msg, err) {
+	if c.checkYaraCompilerErr(msg, err) {
 		return
 	}
 
 	comp.AddString(msg.Data, "")
+	if c.checkYaraRulesErr(msg, comp) {
+		return
+	}
+
 	rules, err := comp.GetRules()
 	if c.checkGetRulesErr(msg, err) {
 		return

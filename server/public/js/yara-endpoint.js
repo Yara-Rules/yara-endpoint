@@ -257,6 +257,9 @@ function updateRule(idx, modal) {
         } else if (data.error) {
             alert("The server was unable to update the asset. Report this.\nErr: " + data.error_msg);
         } else {
+            if (!data.error && data.error_msg.length !== 0) {
+                alert(data.error_msg);
+            }
             loadRules();
         }
     });

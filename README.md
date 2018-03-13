@@ -1,6 +1,8 @@
 YARA-ENDPOINT
 =============
 
+:warning: **THIS PROJECT IS UNDER DEVELOPMENT. USE IT WITHOUT ANY WARRANTY**
+
 Yara as Endpoint is not just an enpoint solution for scanning files, Yara-Enpoint can be used as incident handler solution. While you are in the middle of an incident you have to know what is the scope of it in terms to act properly. You can do that by running your IoC manually against all your assets or using Yara-Endpoint and do it automatically and centralized.
 
 ## How does it work?
