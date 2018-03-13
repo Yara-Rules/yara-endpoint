@@ -1,7 +1,7 @@
 YARA-ENDPOINT
 =============
 
-:warning: **THIS PROJECT IS UNDER DEVELOPMENT. USE IT WITHOUT ANY WARRANTY**
+:warning: **THIS PROJECT IS UNDER DEVELOPMENT. USE IT WITHOUT ANY WARRANTY.**
 
 Yara as Endpoint is not just an enpoint solution for scanning files, Yara-Enpoint can be used as incident handler solution. While you are in the middle of an incident you have to know what is the scope of it in terms to act properly. You can do that by running your IoC manually against all your assets or using Yara-Endpoint and do it automatically and centralized.
 
@@ -52,6 +52,39 @@ There is no need to install anything from Yara-Enpoint side as long as you meet 
 :warning:**REMEMBER**:warning:
 
 This project is under heavy development and a lot of things can change before releasing a final o stable version.
+
+## Example of usage
+### Server
+```
+./yep-server
+{"level":"info","msg":"** Yara-Endpoint Server v0.1.0 **","time":"2018-03-13T22:05:00+01:00"}
+{"level":"info","msg":"Starting TCP Server","time":"2018-03-13T22:05:00+01:00"}
+{"level":"info","msg":"TCP Server started and listening on 0.0.0.0:8080","time":"2018-03-13T22:05:00+01:00"}
+{"level":"info","msg":"Starting WEB Server","time":"2018-03-13T22:05:00+01:00"}
+{"level":"info","msg":"WEB Server started and listening on localhost:8000","time":"2018-03-13T22:05:00+01:00"}
+[Macaron] listening on localhost:8000 (development)
+{"level":"info","msg":"Waiting for connections...","time":"2018-03-13T22:05:00+01:00"}
+
+[...]
+
+{"level":"info","msg":"[[::1]:65320] Processing Register command","time":"2018-03-13T22:05:59+01:00"}
+{"level":"info","msg":"[01C8GJY7ZJEZAFNE8XTXAA1NX6] Processing Ping command","time":"2018-03-13T22:05:59+01:00"}
+{"level":"info","msg":"[01C8GJY7ZJEZAFNE8XTXAA1NX6] Sending PONG due to no task assigned","time":"2018-03-13T22:05:59+01:00"}
+```
+
+### Client
+```
+./yep -server localhost -port 8080
+{"level":"info","msg":"*** Starting Yara-Endpint v0.1.0 ***","time":"2018-03-13T22:05:59+01:00"}
+{"level":"info","msg":"Checking whether endpoint is registered","time":"2018-03-13T22:05:59+01:00"}
+{"level":"warning","msg":"Configuration file not found.","time":"2018-03-13T22:05:59+01:00"}
+{"level":"info","msg":"Endpoint no registered. Registering...","time":"2018-03-13T22:05:59+01:00"}
+{"level":"info","msg":"Sending \u003cRegister\u003e command 1/3.","time":"2018-03-13T22:05:59+01:00"}
+{"level":"info","msg":"Endpoint registered with ULID: 01C8GJY7ZJEZAFNE8XTXAA1NX6","time":"2018-03-13T22:05:59+01:00"}
+{"level":"info","msg":"Endpoint got registered with ID: 01C8GJY7ZJEZAFNE8XTXAA1NX6","time":"2018-03-13T22:05:59+01:00"}
+{"level":"info","msg":"Saving configuration to yara-endpoint.ini","time":"2018-03-13T22:05:59+01:00"}
+{"level":"info","msg":"Sending PING command","time":"2018-03-13T22:05:59+01:00"}
+```
 
 ## Contributing
 There are several ways to contribute to this project, the easy one will be by summting issues, but you can also do a pull request.
