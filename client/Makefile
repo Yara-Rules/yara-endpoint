@@ -9,9 +9,9 @@ LDFLAGS="-s -w \
 
 YARA_VERSION := v3.7.1
 YARA_TAG := yara3.7
-GO := $(shell type go)
-XGO := $(shell type xgo)
-DOCKER := $(shell type docker)
+GO := $(shell which go)
+XGO := $(shell which xgo)
+DOCKER := $(shell which docker)
 TARGET_DIR := build
 OUT_NAME := yep
 
@@ -20,7 +20,7 @@ DOCKER_IMAGE := "x-go-yara"
 # DOCKER_BUILD := $(shell docker images | grep $(DOCKER_IMAGE))
 DEPS := "https://github.com/VirusTotal/yara/archive/$(YARA_VERSION).tar.gz"
 
-.PHONY: all clean linux linux-x86 linux-x64 darwin darwin-x86 darwin-x64 windows windows-x86 windows-x64
+.PHONY: all clean local linux linux-x86 linux-x64 darwin darwin-x86 darwin-x64 windows windows-x86 windows-x64
 
 ifeq ($(GO), "")
 	@echo "You must install Go first. Please visit https://golang.org/ and follow the instructions"
@@ -65,7 +65,7 @@ windows-x86:
 windows-x64:
 	xgo -image $(DOCKER_IMAGE) -tags $(YARA_TAG) -ldflags $(LDFLAGS) -dest build -out $(OUT_NAME) -deps $(DEPS) -targets="windows/amd64" .
 
-manual:
+local:
 	go build -o "$(TARGET_DIR)/$(OUT_NAME)" -ldflags $(LDFLAGS) .
 
 clean:

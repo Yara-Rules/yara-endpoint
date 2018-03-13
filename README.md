@@ -33,8 +33,19 @@ The problem is that Yara does not use a standard Linux compilation way (configur
 
 The way that we solve this is modifying [xgo](https://github.com/Xumeiquer/xgo) project to run `bootstrap.sh` before `./configure`. The counterpart of using the modified version of xgo is that you have to build the docker image first.
 
+The targets for the Makefile are:
+* linux
+* linux-x86
+* linux-x64
+* darwin
+* darwin-x86
+* darwin-x64
+* windows
+* windows-x86
+* windows-x64
+
 #### NOTE
-We are unable to cross compile Yara-Endpoint for Linux targets, we are working on it, but for now you can compile Yara-Enpoint manually.
+We are unable to cross compile Yara-Endpoint for Linux targets using XGO. We are working on it, but for now you can compile Yara-Enpoint manually.
 
 ### Manually
 Other way to get the binaries is compiling the project manually.
@@ -42,7 +53,7 @@ Other way to get the binaries is compiling the project manually.
 * First of all you have to compile and install Yara. Please follow the intructions [here](https://github.com/VirusTotal/yara).
 * Seccond, you have to clone this repo o download it by running `go get github.com/Yara-Rules/yara-endpoint`.
 * Third, you have to go to either `client` or `server` folder and then run `go get -u`.
-* Fourth, build the project it self by running `make manual`.
+* Fourth, build the project it self by running `make local`.
 
 The final binary will be located in the build folder.
 

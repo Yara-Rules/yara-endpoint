@@ -13,7 +13,7 @@ DOCKER_IMAGE := "x-go-yara"
 DEPS := "https://github.com/VirusTotal/yara/archive/$(YARA_VERSION).tar.gz"
 
 
-.PHONY: all clean linux linux-x86 linux-x64 darwin darwin-x86 darwin-x64 windows windows-x86 windows-x64
+.PHONY: all clean local linux linux-x86 linux-x64 darwin darwin-x86 darwin-x64 windows windows-x86 windows-x64
 
 ifeq ($(GO), "")
 	@echo "You must install Go first. Please visit https://golang.org/ and follow the instructions"
@@ -68,9 +68,9 @@ windows-x64:
 	make -C client windows-x64
 	make -C server windows-x64
 
-manual:
-	make -C client manual
-	make -C server manual
+local:
+	make -C client local
+	make -C server local
 
 clean:
 	make -C client clean
