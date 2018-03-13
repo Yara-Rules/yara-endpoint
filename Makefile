@@ -2,9 +2,9 @@
 YARA_VERSION := v3.7.1
 
 
-GO := $(shell type go)
-XGO := $(shell type xgo)
-DOCKER := $(shell type docker)
+GO := $(shell which go)
+XGO := $(shell which xgo)
+DOCKER := $(shell which docker)
 TARGET_DIR := "build"
 
 # "yara-rules/x-go-yara"
