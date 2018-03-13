@@ -52,8 +52,7 @@ Other way to get the binaries is compiling the project manually.
 
 * First of all you have to compile and install Yara. Please follow the intructions [here](https://github.com/VirusTotal/yara).
 * Seccond, you have to clone this repo o download it by running `go get github.com/Yara-Rules/yara-endpoint`.
-* Third, you have to go to either `client` or `server` folder and then run `go get -u`.
-* Fourth, build the project it self by running `make local`.
+* Fourth, build the project it self by running `make local`. This will update the Go libraries before running the compile.
 
 The final binary will be located in the build folder.
 

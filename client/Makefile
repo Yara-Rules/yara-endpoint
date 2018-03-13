@@ -66,6 +66,7 @@ windows-x64:
 	xgo -image $(DOCKER_IMAGE) -tags $(YARA_TAG) -ldflags $(LDFLAGS) -dest build -out $(OUT_NAME) -deps $(DEPS) -targets="windows/amd64" .
 
 local:
+	go get -u
 	go build -o "$(TARGET_DIR)/$(OUT_NAME)" -ldflags $(LDFLAGS) .
 
 clean:
